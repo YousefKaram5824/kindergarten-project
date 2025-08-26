@@ -11,6 +11,9 @@ class KindergartenDatabase:
         
     def connect(self):
         """Establish connection to the database"""
+        if not os.path.exists(self.db_path):
+            print(f"Database file {self.db_path} not found.")
+            return False
         try:
             self.connection = sqlite3.connect(self.db_path)
             self.connection.row_factory = sqlite3.Row
@@ -54,6 +57,7 @@ class KindergartenDatabase:
                     phone TEXT,
                     dad_job TEXT,
                     mum_job TEXT,
+                    problem TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -201,8 +205,8 @@ class KindergartenDatabase:
             self.close()
             
     # Student operations
-    def create_student(self, name: str, age: int, birth_date: str, phone: str = None, 
-                      dad_job: str = None, mum_job: str = None) -> int:
+    def create_student(self, name: str, age: int, birth_date: str, phone: str, 
+                        dad_job: str, mum_job: str, problem: str) -> int:
         """Create a new student and return student ID"""
         try:
             if not self.connect():
@@ -210,9 +214,9 @@ class KindergartenDatabase:
                 
             cursor = self.connection.cursor()
             cursor.execute('''
-                INSERT INTO students (name, age, birth_date, phone, dad_job, mum_job)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (name, age, birth_date, phone, dad_job, mum_job))
+                INSERT INTO students (name, age, birth_date, phone, dad_job, mum_job, problem)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (name, age, birth_date, phone, dad_job, mum_job, problem))
             
             student_id = cursor.lastrowid
             self.connection.commit()
@@ -263,7 +267,7 @@ class KindergartenDatabase:
             
     # Financial operations
     def add_financial_record(self, student_id: int, monthly_fee: float, 
-                           bus_fee: float, month_year: str) -> bool:
+                            bus_fee: float, month_year: str) -> bool:
         """Add financial record for a student"""
         try:
             if not self.connect():
@@ -285,7 +289,7 @@ class KindergartenDatabase:
             
     # Inventory operations
     def add_inventory_item(self, item_name: str, quantity: int, 
-                          purchase_price: float, description: str = None) -> bool:
+                            purchase_price: float, description: str) -> bool:
         """Add inventory item"""
         try:
             if not self.connect():

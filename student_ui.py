@@ -61,18 +61,20 @@ def create_student_registration_tab(page: ft.Page):
     phone = ft.TextField(label="رقم التليفون")
     dad_job = ft.TextField(label="وظيفة الأب")
     mum_job = ft.TextField(label="وظيفة الأم")
+    problem = ft.TextField(label="المشكلة", multiline=True)
     additional_notes = ft.TextField(label="ملاحظات إضافية", multiline=True)
 
     def add_student(e):
         if student_name.value and student_age.value:
             # Add student to database
             student_id = db.create_student(
-                name=student_name.value,
+                name=str(student_name.value),
                 age=int(student_age.value),
-                birth_date=birth_date.value,
-                phone=phone.value,
-                dad_job=dad_job.value,
-                mum_job=mum_job.value
+                birth_date=str(birth_date.value),
+                phone=str(phone.value),
+                dad_job=str(dad_job.value),
+                mum_job=str(mum_job.value),
+                problem=str(problem.value)
             )
             
             if student_id != -1:
@@ -122,6 +124,7 @@ def create_student_registration_tab(page: ft.Page):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
+            ft.DataColumn(ft.Text("المشكلة")),
         ],
         rows=[],
     )
@@ -141,6 +144,7 @@ def create_student_registration_tab(page: ft.Page):
                         ft.DataCell(ft.Text(student['phone'] or "-")),
                         ft.DataCell(ft.Text(student['dad_job'] or "-")),
                         ft.DataCell(ft.Text(student['mum_job'] or "-")),
+                        ft.DataCell(ft.Text(student.get('problem', '-') or "-")),
                     ]
                 )
             )
@@ -160,6 +164,7 @@ def create_student_registration_tab(page: ft.Page):
             phone,
             dad_job,
             mum_job,
+            problem,
             additional_notes,
             add_student_btn,
             ft.Divider(),

@@ -60,11 +60,11 @@ def show_forgot_password_dialog(page: ft.Page):
     success_text = ft.Text("", color=ft.Colors.GREEN)
 
     def handle_reset(e):
-        admin_username = admin_username_field.value.strip()
-        admin_password = admin_password_field.value.strip()
-        target_username = target_username_field.value.strip()
-        new_password = new_password_field.value.strip()
-        confirm_password = confirm_password_field.value.strip()
+        admin_username = admin_username_field.value.strip() if admin_username_field.value else ""
+        admin_password = admin_password_field.value.strip() if admin_password_field.value else ""
+        target_username = target_username_field.value.strip() if target_username_field.value else ""
+        new_password = new_password_field.value.strip() if new_password_field.value else ""
+        confirm_password = confirm_password_field.value.strip() if confirm_password_field.value else ""
         
         # Validation
         if not all([admin_username, admin_password, target_username, new_password, confirm_password]):
@@ -180,12 +180,12 @@ def show_create_account_dialog(page: ft.Page):
     success_text = ft.Text("", color=ft.Colors.GREEN)
 
     def handle_create(e):
-        admin_username = admin_username_field.value.strip()
-        admin_password = admin_password_field.value.strip()
-        new_username = new_username_field.value.strip()
-        new_password = new_password_field.value.strip()
-        confirm_password = confirm_password_field.value.strip()
-        role = role_dropdown.value
+        admin_username = admin_username_field.value.strip() if admin_username_field.value else ""
+        admin_password = admin_password_field.value.strip() if admin_password_field.value else ""
+        new_username = new_username_field.value.strip() if new_username_field.value else ""
+        new_password = new_password_field.value.strip() if new_password_field.value else ""
+        confirm_password = confirm_password_field.value.strip() if confirm_password_field.value else ""
+        role = role_dropdown.value if role_dropdown.value else ""
         
         # Validation
         if not all([admin_username, admin_password, new_username, new_password, confirm_password]):
