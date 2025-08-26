@@ -3,5 +3,15 @@
     "username": "admin",
     "hashed_password": "1fec169bbabb348d165a7b10e769dfab$5b625d4684de9a6ce5cb270680e529d54b2d1771a64bac399448505a6795c7a5",
     "role": "admin"
+  },
+  {
+    "username": "testuser",
+    "hashed_password": "324b7775f21db88f39be20707c9201b2$40af2e332038269d322ee76c580bab72d901daea7acd80614398cdff8f073d2c",
+    "role": "user"
+  },
+  {
+    "username": "newuser",
+    "hashed_password": "644b0d96c7d720509f1de5df4dab9b93$0f5be50a66bf3d280f705e58be7b92b67a8d5f29c152eff7b3920ab09ec669af",
+    "role": "user"
   }
 ]

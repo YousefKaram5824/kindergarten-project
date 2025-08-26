@@ -1,7 +1,10 @@
 import hashlib
-import secrets
 import json
 import os
+import secrets
+
+# Local imports
+from database import db
 
 class User:
     def __init__(self, username, hashed_password, role="admin"):
@@ -10,12 +13,13 @@ class User:
         self.role = role
 
 class Student:
-    def __init__(self, name, age, birth_date, phone, parent_job):
+    def __init__(self, name, age, birth_date, phone, dad_job, mum_job):
         self.name = name
         self.age = age
         self.birth_date = birth_date
         self.phone = phone
-        self.parent_job = parent_job
+        self.dad_job = dad_job
+        self.mum_job = mum_job
 
 class Parent:
     def __init__(self, name, job):
@@ -37,7 +41,6 @@ class InventoryItem:
 # Authentication utilities
 class AuthManager:
     def __init__(self):
-        self.users_file = "users.json"
         self.users = self.load_users()
         
     def hash_password(self, password, salt=None):
@@ -59,52 +62,79 @@ class AuthManager:
             return False
     
     def load_users(self):
-        """Load users from JSON file"""
-        if os.path.exists(self.users_file):
-            try:
-                with open(self.users_file, 'r', encoding='utf-8') as f:
-                    users_data = json.load(f)
-                    return {user_data['username']: User(**user_data) for user_data in users_data}
-            except:
-                return {}
-        return {}
-    
-    def save_users(self):
-        """Save users to JSON file"""
-        users_data = [
-            {
-                'username': user.username,
-                'hashed_password': user.hashed_password,
-                'role': user.role
-            }
-            for user in self.users.values()
-        ]
-        with open(self.users_file, 'w', encoding='utf-8') as f:
-            json.dump(users_data, f, ensure_ascii=False, indent=2)
+        """Load users from database"""
+        users_data = db.get_all_users()
+        return {user_data['username']: User(user_data['username'], user_data['hashed_password'], user_data['role']) 
+                for user_data in users_data}
     
     def create_user(self, username, password, role="admin"):
-        """Create a new user"""
+        """Create a new user in database"""
         if username in self.users:
             return False, "اسم المستخدم موجود مسبقاً"
         
         hashed_password = self.hash_password(password)
-        self.users[username] = User(username, hashed_password, role)
-        self.save_users()
-        return True, "تم إنشاء المستخدم بنجاح"
+        success = db.create_user(username, hashed_password, role)
+        if success:
+            self.users[username] = User(username, hashed_password, role)
+            return True, "تم إنشاء المستخدم بنجاح"
+        return False, "فشل في إنشاء المستخدم"
     
     def authenticate(self, username, password):
         """Authenticate user credentials"""
-        user = self.users.get(username)
-        if user and self.verify_password(user.hashed_password, password):
+        user_data = db.get_user(username)
+        if user_data and self.verify_password(user_data['hashed_password'], password):
+            user = User(user_data['username'], user_data['hashed_password'], user_data['role'])
             return True, user
         return False, "اسم المستخدم أو كلمة المرور غير صحيحة"
     
     def initialize_default_admin(self):
         """Create default admin user if no users exist"""
-        if not self.users:
+        users = db.get_all_users()
+        if not users:
             success, message = self.create_user("admin", "admin123", "admin")
             return success, message
         return True, "المستخدمون موجودون بالفعل"
+    
+    def reset_password(self, username, new_password, admin_username, admin_password):
+        """Reset user password with admin verification"""
+        # Verify admin credentials first
+        admin_auth, admin_msg = self.authenticate(admin_username, admin_password)
+        if not admin_auth:
+            return False, "كلمة مرور المدير غير صحيحة"
+        
+        # Check if admin user has admin role
+        admin_user = self.users.get(admin_username)
+        if not admin_user or admin_user.role != "admin":
+            return False, "ليست لديك صلاحية لإعادة تعيين كلمات المرور"
+        
+        # Check if target user exists
+        if username not in self.users:
+            return False, "اسم المستخدم غير موجود"
+        
+        # Reset the password in database
+        hashed_password = self.hash_password(new_password)
+        # For now, we'll create a new user with updated password
+        # In a real implementation, we'd have an update_user method in the database
+        success = db.create_user(username, hashed_password, self.users[username].role)
+        if success:
+            self.users[username].hashed_password = hashed_password
+            return True, "تم إعادة تعيين كلمة المرور بنجاح"
+        return False, "فشل في إعادة تعيين كلمة المرور"
+    
+    def verify_admin(self, username, password):
+        """Verify if user is an admin with correct credentials"""
+        auth_result, user_or_msg = self.authenticate(username, password)
+        if not auth_result:
+            return False, "اسم المستخدم أو كلمة المرور غير صحيحة"
+        
+        # Check if user_or_msg is a User object (not an error message)
+        if isinstance(user_or_msg, str):
+            return False, user_or_msg
+        
+        if user_or_msg.role != "admin":
+            return False, "ليست لديك صلاحية المدير"
+        
+        return True, "تم التحقق من هوية المدير بنجاح"
 
 # Global auth manager instance
 auth_manager = AuthManager()
