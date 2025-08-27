@@ -12,6 +12,8 @@ def set_show_main_system_callback(callback):
     show_main_system_callback = callback
 
 def show_forgot_password_dialog(page: ft.Page):
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
     """Show forgot password dialog with admin verification"""
     admin_username_field = ft.TextField(
         label="اسم المستخدم للمدير",
@@ -185,7 +187,7 @@ def show_create_account_dialog(page: ft.Page):
         new_username = new_username_field.value.strip() if new_username_field.value else ""
         new_password = new_password_field.value.strip() if new_password_field.value else ""
         confirm_password = confirm_password_field.value.strip() if confirm_password_field.value else ""
-        role = role_dropdown.value if role_dropdown.value else ""
+        role = role_dropdown.value or ""
         
         # Validation
         if not all([admin_username, admin_password, new_username, new_password, confirm_password]):
@@ -304,6 +306,7 @@ def show_login_page(page: ft.Page):
     # Layout for login page
     login_page = ft.Column(
         [
+            
             ft.Image(src="logo.jpg", width=200),
             ft.Text("نظام إدارة رياض الأطفال", size=32, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_700),
             username_field,
