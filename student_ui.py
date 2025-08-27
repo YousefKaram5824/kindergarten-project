@@ -172,12 +172,15 @@ def create_student_registration_tab(page: ft.Page):
                 ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Container(
-                content=student_data_table,
+                content=ft.Column([
+                    student_data_table
+                ], scroll=ft.ScrollMode.AUTO),
                 height=400,
                 border=ft.border.all(1, ft.Colors.GREY_300),
                 border_radius=8,
                 padding=10,
             )
         ],
-        scroll=ft.ScrollMode.AUTO
+        scroll=ft.ScrollMode.AUTO,
+        expand=True
     )

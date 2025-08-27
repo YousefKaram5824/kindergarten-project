@@ -118,6 +118,7 @@ def show_forgot_password_dialog(page: ft.Page):
             height=500,
             scroll=ft.ScrollMode.AUTO
         )
+        
     )
     
     page.open(dialog)
