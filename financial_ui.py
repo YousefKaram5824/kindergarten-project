@@ -3,11 +3,14 @@ import flet as ft
 # Local imports
 from kindergarten_management import FinancialRecord
 
+
 def create_financial_tab(page: ft.Page):
     """Create and return the financial management tab"""
     # Financial Management Form in Arabic
     financial_student_name = ft.TextField(label="اسم الطالب")
-    monthly_fee = ft.TextField(label="المصروفات الشهرية", keyboard_type=ft.KeyboardType.NUMBER)
+    monthly_fee = ft.TextField(
+        label="المصروفات الشهرية", keyboard_type=ft.KeyboardType.NUMBER
+    )
     bus_fee = ft.TextField(label="أجرة الباص", keyboard_type=ft.KeyboardType.NUMBER)
 
     # Data storage
@@ -18,7 +21,7 @@ def create_financial_tab(page: ft.Page):
             record = FinancialRecord(
                 student_name=financial_student_name.value,
                 monthly_fee=monthly_fee.value,
-                bus_fee=bus_fee.value
+                bus_fee=bus_fee.value,
             )
             financial_records.append(record)
             financial_student_name.value = ""
@@ -28,7 +31,7 @@ def create_financial_tab(page: ft.Page):
             snackbar = ft.SnackBar(
                 content=ft.Text("تم إضافة السجل المالي بنجاح!"),
                 bgcolor=ft.Colors.GREEN,
-                duration=3000
+                duration=3000,
             )
             page.overlay.append(snackbar)
             page.update()
@@ -36,7 +39,9 @@ def create_financial_tab(page: ft.Page):
             snackbar.update()
             page.update()
 
-    add_financial_btn = ft.ElevatedButton("إضافة سجل مالي", on_click=add_financial_record)
+    add_financial_btn = ft.ElevatedButton(
+        "إضافة سجل مالي", on_click=add_financial_record
+    )
 
     financial_list = ft.Column()
 
@@ -46,7 +51,9 @@ def create_financial_tab(page: ft.Page):
             financial_list.controls.append(
                 ft.ListTile(
                     title=ft.Text(record.student_name),
-                    subtitle=ft.Text(f"شهري: ${record.monthly_fee}, باص: ${record.bus_fee}"),
+                    subtitle=ft.Text(
+                        f"شهري: ${record.monthly_fee}, باص: ${record.bus_fee}"
+                    ),
                 )
             )
 
@@ -60,7 +67,7 @@ def create_financial_tab(page: ft.Page):
             add_financial_btn,
             ft.Divider(),
             ft.Text("السجلات المالية:", size=18, weight=ft.FontWeight.BOLD),
-            financial_list
+            financial_list,
         ],
-        scroll=ft.ScrollMode.AUTO
+        scroll=ft.ScrollMode.AUTO,
     )

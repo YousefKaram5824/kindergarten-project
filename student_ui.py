@@ -4,60 +4,61 @@ import flet as ft
 # Local imports
 from database import db
 
+
 def create_student_registration_tab(page: ft.Page):
     """Create and return the student registration tab"""
     # Student Registration Form in Arabic
     student_name = ft.TextField(label="اسم الطالب")
-    
+
     # Age counter
     student_age = ft.Text("0", size=20, weight=ft.FontWeight.BOLD)
     age_counter = 0
-    
+
     def increment_age(e):
         nonlocal age_counter
         age_counter += 1
         student_age.value = str(age_counter)
         page.update()
-    
+
     def decrement_age(e):
         nonlocal age_counter
         if age_counter > 0:
             age_counter -= 1
             student_age.value = str(age_counter)
         page.update()
-    
-    age_controls = ft.Row([
-        ft.ElevatedButton("-", on_click=decrement_age, width=40),
-        student_age,
-        ft.ElevatedButton("+", on_click=increment_age, width=40),
-    ], alignment=ft.MainAxisAlignment.CENTER)
-    
+
+    age_controls = ft.Row(
+        [
+            ft.ElevatedButton("-", on_click=decrement_age, width=40),
+            student_age,
+            ft.ElevatedButton("+", on_click=increment_age, width=40),
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+    )
+
     # Date picker for birth date
     birth_date = ft.TextField(label="تاريخ الميلاد", read_only=True)
     selected_date = None
-    
+
     def handle_date_picker(e):
         nonlocal selected_date
         if e.control.value:
             selected_date = e.control.value
             birth_date.value = selected_date.strftime("%Y-%m-%d")
             page.update()
-    
+
     date_picker = ft.DatePicker(
         on_change=handle_date_picker,
         first_date=datetime.datetime(2000, 1, 1),
         last_date=datetime.datetime.now(),
     )
     page.overlay.append(date_picker)
-    
+
     def open_date_picker(e):
         page.open(date_picker)
-    
-    date_picker_btn = ft.ElevatedButton(
-        "اختر التاريخ",
-        on_click=open_date_picker
-    )
-    
+
+    date_picker_btn = ft.ElevatedButton("اختر التاريخ", on_click=open_date_picker)
+
     phone = ft.TextField(label="رقم التليفون")
     dad_job = ft.TextField(label="وظيفة الأب")
     mum_job = ft.TextField(label="وظيفة الأم")
@@ -74,9 +75,9 @@ def create_student_registration_tab(page: ft.Page):
                 phone=str(phone.value),
                 dad_job=str(dad_job.value),
                 mum_job=str(mum_job.value),
-                problem=str(problem.value)
+                problem=str(problem.value),
             )
-            
+
             if student_id != -1:
                 # Clear form fields
                 student_name.value = ""
@@ -87,14 +88,14 @@ def create_student_registration_tab(page: ft.Page):
                 dad_job.value = ""
                 mum_job.value = ""
                 additional_notes.value = ""
-                
+
                 # Refresh student table
                 update_student_table()
-                
+
                 snackbar = ft.SnackBar(
                     content=ft.Text("تم إضافة الطالب بنجاح!"),
                     bgcolor=ft.Colors.GREEN,
-                    duration=3000
+                    duration=3000,
                 )
                 page.overlay.append(snackbar)
                 page.update()
@@ -105,7 +106,7 @@ def create_student_registration_tab(page: ft.Page):
                 snackbar = ft.SnackBar(
                     content=ft.Text("فشل في إضافة الطالب!"),
                     bgcolor=ft.Colors.RED,
-                    duration=3000
+                    duration=3000,
                 )
                 page.overlay.append(snackbar)
                 page.update()
@@ -133,18 +134,18 @@ def create_student_registration_tab(page: ft.Page):
         # Get students from database
         students_data = db.get_all_students()
         student_data_table.rows.clear()
-        
+
         for student in students_data:
             student_data_table.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(student['name'])),
-                        ft.DataCell(ft.Text(str(student['age']))),
-                        ft.DataCell(ft.Text(student['birth_date'] or "-")),
-                        ft.DataCell(ft.Text(student['phone'] or "-")),
-                        ft.DataCell(ft.Text(student['dad_job'] or "-")),
-                        ft.DataCell(ft.Text(student['mum_job'] or "-")),
-                        ft.DataCell(ft.Text(student.get('problem', '-') or "-")),
+                        ft.DataCell(ft.Text(student["name"])),
+                        ft.DataCell(ft.Text(str(student["age"]))),
+                        ft.DataCell(ft.Text(student["birth_date"] or "-")),
+                        ft.DataCell(ft.Text(student["phone"] or "-")),
+                        ft.DataCell(ft.Text(student["dad_job"] or "-")),
+                        ft.DataCell(ft.Text(student["mum_job"] or "-")),
+                        ft.DataCell(ft.Text(student.get("problem", "-") or "-")),
                     ]
                 )
             )
@@ -168,19 +169,18 @@ def create_student_registration_tab(page: ft.Page):
             additional_notes,
             add_student_btn,
             ft.Divider(),
-            ft.Row([
-                ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD)
-            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+            ft.Row(
+                [ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD)],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            ),
             ft.Container(
-                content=ft.Column([
-                    student_data_table
-                ], scroll=ft.ScrollMode.AUTO),
+                content=ft.Column([student_data_table], scroll=ft.ScrollMode.AUTO),
                 height=400,
                 border=ft.border.all(1, ft.Colors.GREY_300),
                 border_radius=8,
                 padding=10,
-            )
+            ),
         ],
         scroll=ft.ScrollMode.AUTO,
-        expand=True
+        expand=True,
     )

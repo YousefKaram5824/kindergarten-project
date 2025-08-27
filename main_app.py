@@ -1,5 +1,6 @@
 import datetime
 import flet as ft
+
 # Removed MaterialState import
 
 # Local imports
@@ -15,10 +16,12 @@ from dashboard_ui import show_main_system
 # Initialize default admin user
 auth_manager.initialize_default_admin()
 
+
 def back_to_login(page: ft.Page):
     """Return to login page"""
     page.clean()
     show_login_page(page)
+
 
 def main(page: ft.Page):
     # Configure page settings for Arabic RTL
@@ -29,7 +32,7 @@ def main(page: ft.Page):
     page.padding = 20
     page.rtl = True  # Enable Right-to-Left layout
     page.window.maximized = True
-    
+
     # Custom scrollbar styling
     page.theme = ft.Theme(
         scrollbar_theme=ft.ScrollbarTheme(
@@ -44,12 +47,13 @@ def main(page: ft.Page):
             cross_axis_margin=2,
         )
     )
-    
+
     # Set the callback for showing main system
     set_show_main_system_callback(show_main_system)
-    
+
     # Show login page initially
     show_login_page(page)
+
 
 if __name__ == "__main__":
     ft.app(target=main)

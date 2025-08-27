@@ -3,12 +3,15 @@ import flet as ft
 # Local imports
 from kindergarten_management import InventoryItem
 
+
 def create_inventory_tab(page: ft.Page):
     """Create and return the inventory management tab"""
     # Inventory Management Form in Arabic
     item_name = ft.TextField(label="اسم الأداة")
     item_quantity = ft.TextField(label="الكمية", keyboard_type=ft.KeyboardType.NUMBER)
-    purchase_price = ft.TextField(label="سعر الشراء", keyboard_type=ft.KeyboardType.NUMBER)
+    purchase_price = ft.TextField(
+        label="سعر الشراء", keyboard_type=ft.KeyboardType.NUMBER
+    )
 
     inventory_items = []
 
@@ -17,7 +20,7 @@ def create_inventory_tab(page: ft.Page):
             item = InventoryItem(
                 item_name=item_name.value,
                 quantity=item_quantity.value,
-                purchase_price=purchase_price.value
+                purchase_price=purchase_price.value,
             )
             inventory_items.append(item)
             item_name.value = ""
@@ -27,7 +30,7 @@ def create_inventory_tab(page: ft.Page):
             snackbar = ft.SnackBar(
                 content=ft.Text("تم إضافة العنصر بنجاح!"),
                 bgcolor=ft.Colors.GREEN,
-                duration=3000
+                duration=3000,
             )
             page.overlay.append(snackbar)
             page.update()
@@ -45,7 +48,9 @@ def create_inventory_tab(page: ft.Page):
             inventory_list.controls.append(
                 ft.ListTile(
                     title=ft.Text(item.item_name),
-                    subtitle=ft.Text(f"الكمية: {item.quantity}, السعر: ${item.purchase_price}"),
+                    subtitle=ft.Text(
+                        f"الكمية: {item.quantity}, السعر: ${item.purchase_price}"
+                    ),
                 )
             )
 
@@ -59,7 +64,7 @@ def create_inventory_tab(page: ft.Page):
             add_inventory_btn,
             ft.Divider(),
             ft.Text("عناصر المخزون:", size=18, weight=ft.FontWeight.BOLD),
-            inventory_list
+            inventory_list,
         ],
-        scroll=ft.ScrollMode.AUTO
+        scroll=ft.ScrollMode.AUTO,
     )

@@ -3,21 +3,25 @@ import flet as ft
 # Local imports
 from database import db
 
+
 def create_reports_tab(page: ft.Page, financial_records, inventory_items):
     """Create and return the reports tab"""
     report_content = ft.TextField(
-        multiline=True,
-        read_only=True,
-        expand=True,
-        border=ft.InputBorder.NONE
+        multiline=True, read_only=True, expand=True, border=ft.InputBorder.NONE
     )
 
     def generate_report(e):
         students_data = db.get_all_students()
         total_students = len(students_data)
-        total_financial = sum(float(record.monthly_fee) + float(record.bus_fee or 0) for record in financial_records)
-        total_inventory = sum(float(item.quantity) * float(item.purchase_price or 0) for item in inventory_items)
-        
+        total_financial = sum(
+            float(record.monthly_fee) + float(record.bus_fee or 0)
+            for record in financial_records
+        )
+        total_inventory = sum(
+            float(item.quantity) * float(item.purchase_price or 0)
+            for item in inventory_items
+        )
+
         report_content.value = f"""
         تقرير نظام إدارة رياض الأطفال
         =============================
@@ -45,8 +49,8 @@ def create_reports_tab(page: ft.Page, financial_records, inventory_items):
             ft.Divider(),
             generate_report_btn,
             ft.Divider(),
-            report_content
+            report_content,
         ],
         scroll=ft.ScrollMode.AUTO,
-        expand=True
+        expand=True,
     )
