@@ -2,12 +2,12 @@ import flet as ft
 import time
 
 # Local imports
-from auth_ui import set_show_main_system_callback, show_login_page
+from view.auth_ui import set_show_main_system_callback, show_login_page
 from database import db
-from financial_ui import create_financial_tab
-from inventory_ui import create_inventory_tab
-from reports_ui import create_reports_tab
-from student_ui import create_student_registration_tab
+from view.financial_ui import create_financial_tab
+from view.inventory_ui import create_inventory_tab
+from view.reports_ui import create_reports_tab
+from view.student_ui import create_student_registration_tab
 
 
 class HoverNavigationRail(ft.Container):

@@ -126,6 +126,7 @@ def create_student_registration_tab(page: ft.Page):
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
             ft.DataColumn(ft.Text("المشكلة")),
+            ft.DataColumn(ft.Text("تاريخ الزيارة")),
         ],
         rows=[],
     )
@@ -146,6 +147,12 @@ def create_student_registration_tab(page: ft.Page):
                         ft.DataCell(ft.Text(student["dad_job"] or "-")),
                         ft.DataCell(ft.Text(student["mum_job"] or "-")),
                         ft.DataCell(ft.Text(student.get("problem", "-") or "-")),
+                        ft.DataCell(
+                            ft.Text(
+                                datetime.datetime.fromisoformat(student.get("created_at", "-")).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+                                if student.get("created_at") else "-"
+                            )
+                        ),  # New cell for registration date
                     ]
                 )
             )
