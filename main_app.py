@@ -27,7 +27,7 @@ def main(page: ft.Page):
     # Configure page settings for Arabic RTL
     page.bgcolor = "#E3DCCC"  # Set background color
     page.title = "نظام إدارة رياض الأطفال - تسجيل الدخول"
-    page.window.icon = "Y:\\kindengarten\\logo.ico"
+    page.window.icon = "logo.ico"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 20
     page.rtl = True  # Enable Right-to-Left layout

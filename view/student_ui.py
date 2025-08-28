@@ -1,4 +1,6 @@
 import datetime
+import os
+import shutil
 import flet as ft
 
 # Local imports
@@ -65,9 +67,54 @@ def create_student_registration_tab(page: ft.Page):
     problem = ft.TextField(label="المشكلة", multiline=True)
     additional_notes = ft.TextField(label="ملاحظات إضافية", multiline=True)
 
+    # Photo upload functionality
+    photo_path = None
+    photo_preview = ft.Image(src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False)
+    photo_status = ft.Text("لم يتم اختيار صورة", size=12, color=ft.Colors.GREY)
+
+    def handle_file_picker_result(e: ft.FilePickerResultEvent):
+        nonlocal photo_path
+        if e.files:
+            # Create student_photos directory if it doesn't exist
+            photos_dir = "student_photos"
+            if not os.path.exists(photos_dir):
+                os.makedirs(photos_dir)
+            
+            # Copy the file to student_photos directory
+            uploaded_file = e.files[0]
+            file_extension = os.path.splitext(uploaded_file.name)[1]
+            new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            photo_path = os.path.join(photos_dir, new_filename)
+            
+            # Copy the file
+            shutil.copy2(uploaded_file.path, photo_path)
+            
+            # Update UI
+            photo_preview.src = photo_path
+            photo_preview.visible = True
+            photo_status.value = f"تم اختيار: {uploaded_file.name}"
+            photo_status.color = ft.Colors.GREEN
+            page.update()
+
+    file_picker = ft.FilePicker(on_result=handle_file_picker_result)
+    page.overlay.append(file_picker)
+
+    def pick_photo(e):
+        file_picker.pick_files(
+            allow_multiple=False,
+            allowed_extensions=["jpg", "jpeg", "png", "gif"],
+            dialog_title="اختر صورة الطالب"
+        )
+
+    photo_upload_btn = ft.ElevatedButton(
+        "رفع صورة الطالب",
+        icon=ft.Icons.UPLOAD_FILE,
+        on_click=pick_photo
+    )
+
     def add_student(e):
         if student_name.value and student_age.value:
-            # Add student to database
+            # Add student to database with photo path
             student_id = db.create_student(
                 name=str(student_name.value),
                 age=int(student_age.value),
@@ -76,6 +123,7 @@ def create_student_registration_tab(page: ft.Page):
                 dad_job=str(dad_job.value),
                 mum_job=str(mum_job.value),
                 problem=str(problem.value),
+                photo_path=photo_path
             )
 
             if student_id != -1:
@@ -149,7 +197,7 @@ def create_student_registration_tab(page: ft.Page):
                         ft.DataCell(ft.Text(student.get("problem", "-") or "-")),
                         ft.DataCell(
                             ft.Text(
-                                datetime.datetime.fromisoformat(student.get("created_at", "-")).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+                                datetime.datetime.fromisoformat(student.get("created_at", "-")).strftime("%Y-%m-%d %H:%M:%S")
                                 if student.get("created_at") else "-"
                             )
                         ),  # New cell for registration date
@@ -174,6 +222,11 @@ def create_student_registration_tab(page: ft.Page):
             mum_job,
             problem,
             additional_notes,
+            # Photo upload section
+            ft.Text("صورة الطالب:", size=16, weight=ft.FontWeight.BOLD),
+            photo_upload_btn,
+            ft.Row([photo_preview], alignment=ft.MainAxisAlignment.CENTER),
+            photo_status,
             add_student_btn,
             ft.Divider(),
             ft.Row(

@@ -1,5 +1,6 @@
 import flet as ft
 import time
+import asyncio
 
 # Local imports
 from view.auth_ui import set_show_main_system_callback, show_login_page
@@ -38,20 +39,24 @@ class HoverNavigationRail(ft.Container):
 
         # Add hover functionality
         self.on_hover = self.handle_hover
+        self.hovered = False  # Track hover state
 
     def handle_hover(self, e):
         if e.data == "true":
             # Mouse entered - expand
-            self.expand_rail()
+            if not self.hovered:  # Only expand if not already hovered
+                self.hovered = True
+                self.expand_rail()
         else:
             # Mouse left - collapse after delay
+            self.hovered = False
             self.collapse_rail()
 
     def expand_rail(self):
         if not self.is_expanded:
             self.is_expanded = True
             self.nav_rail.label_type = ft.NavigationRailLabelType.ALL
-            self.width = 200
+            self.width = 80
             self.animate = ft.Animation(
                 duration=300, curve=ft.AnimationCurve.EASE_IN_OUT
             )
@@ -63,13 +68,45 @@ class HoverNavigationRail(ft.Container):
             self.nav_rail.label_type = ft.NavigationRailLabelType.NONE
             self.width = 60
             self.animate = ft.Animation(
-                duration=300, curve=ft.AnimationCurve.EASE_IN_OUT
+                duration=300, curve=ft.AnimationCurve.EASE_OUT_BACK
             )
             self.update()
 
     def did_mount(self):
         # Store page reference when control is mounted
         self._page = self.page
+
+
+class DigitalClock(ft.Container):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.date_text = ft.Text(
+            time.strftime("%Y-%m-%d"),
+            size=16,
+            weight=ft.FontWeight.NORMAL,
+            color=ft.Colors.GREY_600,
+        )
+        self.clock_text = ft.Text(
+            time.strftime("%H:%M:%S"),
+            size=20,
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.GREY_600,
+        )
+        self.content = ft.Column([self.date_text, self.clock_text], spacing=0)
+        self.padding = ft.padding.only(right=10)
+
+    def did_mount(self):
+        # Start timer when control is mounted to the page
+        self.page.run_task(self.update_clock)
+
+    async def update_clock(self):
+        while True:
+            current_time = time.strftime("%H:%M:%S")
+            current_date = time.strftime("%Y-%m-%d")
+            self.clock_text.value = current_time
+            self.date_text.value = current_date
+            self.update()
+            await asyncio.sleep(1)
 
 
 def create_dashboard(page: ft.Page, current_user):
@@ -116,7 +153,7 @@ def create_dashboard(page: ft.Page, current_user):
         ),
     )
 
-    # Dashboard header with user info
+    # Dashboard header with user info and clock
     header = ft.Row(
         [
             ft.IconButton(
@@ -132,6 +169,7 @@ def create_dashboard(page: ft.Page, current_user):
                 color=ft.Colors.BLUE_700,
             ),
             ft.Container(expand=True),
+            DigitalClock(),  # Digital clock added here
             ft.Text(
                 f"مرحباً: {current_user.username if current_user else 'زائر'}",
                 size=16,

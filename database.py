@@ -30,7 +30,16 @@ class KindergartenDatabase:
 
     def initialize_database(self):
         """Initialize the database with all required tables"""
-        if not self.connect():
+        print(f"Initializing database at: {self.db_path}")
+        
+        # Create the database file if it doesn't exist
+        try:
+            self.connection = sqlite3.connect(self.db_path)
+            self.connection.row_factory = sqlite3.Row
+            print("Database connection established successfully")
+            print("DEBUG: About to create tables...")
+        except sqlite3.Error as e:
+            print(f"Database connection error: {e}")
             return False
 
         try:
@@ -62,6 +71,7 @@ class KindergartenDatabase:
                     dad_job TEXT,
                     mum_job TEXT,
                     problem TEXT,
+                    photo_path TEXT,  -- New column for storing photo path
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -119,6 +129,7 @@ class KindergartenDatabase:
 
             self.connection.commit()
             print("Database initialized successfully!")
+            print("Tables created successfully!")
             return True
 
         except sqlite3.Error as e:
@@ -237,6 +248,7 @@ class KindergartenDatabase:
         dad_job: str,
         mum_job: str,
         problem: str,
+        photo_path: str = None,
     ) -> int:
         """Create a new student and return student ID"""
         try:
@@ -244,19 +256,24 @@ class KindergartenDatabase:
                 return -1
 
             cursor = self.connection.cursor()
-            cursor.execute(
-                """
-                INSERT INTO students (name, age, birth_date, phone, dad_job, mum_job, problem)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-                (name, age, birth_date, phone, dad_job, mum_job, problem),
-            )
-
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO students (name, age, birth_date, phone, dad_job, mum_job, problem, photo_path, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                """,
+                    (name, age, birth_date, phone, dad_job, mum_job, problem, photo_path),
+                )
+            except sqlite3.Error as e:
+                print(f"Error adding student: {e}")
+                return -1
+                
             student_id = cursor.lastrowid
             self.connection.commit()
             return student_id
 
-        except sqlite3.Error:
+        except sqlite3.Error as e:
+            print(f"Database error in create_student: {e}")
             return -1
         finally:
             self.close()
