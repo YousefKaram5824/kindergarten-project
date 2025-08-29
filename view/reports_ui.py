@@ -1,7 +1,7 @@
 import flet as ft
 
 # Local imports
-from database import db
+from database import get_db
 
 
 def create_reports_tab(page: ft.Page, financial_records, inventory_items):
@@ -11,7 +11,7 @@ def create_reports_tab(page: ft.Page, financial_records, inventory_items):
     )
 
     def generate_report(e):
-        students_data = db.get_all_students()
+        students_data = get_db.get_all_students()
         total_students = len(students_data)
         total_financial = sum(
             float(record.monthly_fee) + float(record.bus_fee or 0)

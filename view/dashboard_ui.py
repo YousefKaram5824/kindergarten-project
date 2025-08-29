@@ -4,7 +4,7 @@ import asyncio
 
 # Local imports
 from view.auth_ui import set_show_main_system_callback, show_login_page
-from database import db
+from database import get_db
 from view.financial_ui import create_financial_tab
 from view.inventory_ui import create_inventory_tab
 from view.reports_ui import create_reports_tab
@@ -322,11 +322,11 @@ def update_dashboard_stats(stats_row):
     """Update dashboard statistics with real data"""
     try:
         # Get students count
-        students = db.get_all_students()
+        students = get_db.get_all_students()
         students_count = len(students)
 
         # Get inventory count
-        inventory = db.get_all_inventory()
+        inventory = get_db.get_all_inventory()
         inventory_count = len(inventory)
 
         # Update stats cards

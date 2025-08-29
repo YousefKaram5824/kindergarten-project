@@ -4,7 +4,7 @@ import shutil
 import flet as ft
 
 # Local imports
-from database import db
+from database import get_db
 
 
 def create_student_registration_tab(page: ft.Page):
@@ -115,7 +115,7 @@ def create_student_registration_tab(page: ft.Page):
     def add_student(e):
         if student_name.value and student_age.value:
             # Add student to database with photo path
-            student_id = db.create_student(
+            student_id = get_db.create_student(
                 name=str(student_name.value),
                 age=int(student_age.value),
                 birth_date=str(birth_date.value),
@@ -181,7 +181,7 @@ def create_student_registration_tab(page: ft.Page):
 
     def update_student_table():
         # Get students from database
-        students_data = db.get_all_students()
+        students_data = get_db.get_all_students()
         student_data_table.rows.clear()
 
         for student in students_data:
