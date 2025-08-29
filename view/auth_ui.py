@@ -310,9 +310,12 @@ def show_login_page(page: ft.Page):
         if success:
             if show_main_system_callback:
                 show_main_system_callback(page, result)
+            # Clear any previous error message
+            login_error_text.value = ""
         else:
-            login_error_text.value = result
-            page.update()
+            # Ensure result is converted to string
+            login_error_text.value = str(result)
+        page.update()
 
     login_button.on_click = handle_login
 

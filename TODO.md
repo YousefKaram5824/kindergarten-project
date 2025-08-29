@@ -1,17 +1,14 @@
-# Photo Upload Feature Implementation
+# Age Controls Modification Plan
 
 ## Steps to Complete:
+1. [x] Modify age controls in `view/student_ui.py` to include:
+   - Label "العمر" (Age)
+   - TextField for direct number input
+   - Icon buttons (ft.Icons.ADD and ft.Icons.REMOVE)
+2. [x] Update functions to handle both direct input and button clicks
+3. [x] Update add_student function to use text field value
+4. [ ] Test the implementation
 
-1. [x] Update database schema to add photo_path column to students table
-2. [x] Modify database.py to handle photo path in create_student method
-3. [x] Update student_ui.py to add file upload functionality
-4. [x] Create directory structure for storing student photos
-5. [ ] Test the photo upload functionality
-
-## Files to Modify:
-- database.py (add photo_path column and update methods)
-- view/student_ui.py (add file picker and photo display)
-- main_app.py (ensure proper file handling setup)
-
-## Dependencies:
-- May need to install Pillow for image handling if not already installed
+## Current Status:
+- Age controls successfully modified
+- Ready to test the implementation

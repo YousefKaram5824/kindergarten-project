@@ -12,9 +12,29 @@ def create_student_registration_tab(page: ft.Page):
     # Student Registration Form in Arabic
     student_name = ft.TextField(label="اسم الطالب")
 
-    # Age counter
-    student_age = ft.Text("0", size=20, weight=ft.FontWeight.BOLD)
+    # Age controls with label, textbox, and icon buttons
+    age_label = ft.Text("العمر", size=16, weight=ft.FontWeight.BOLD)
+    student_age = ft.TextField(value="2", width=80, text_align=ft.TextAlign.CENTER)
     age_counter = 0
+
+    def update_age_from_input(e):
+        """Update age counter from text input"""
+        nonlocal age_counter
+        try:
+            if student_age.value is not None:  # Explicit None check
+                new_age = int(student_age.value)
+                if new_age >= 0:
+                    age_counter = new_age
+                    student_age.value = str(age_counter)
+                else:
+                    student_age.value = str(age_counter)  # Revert to previous value
+            else:
+                student_age.value = str(age_counter)  # Handle None case
+        except ValueError:
+            student_age.value = str(
+                age_counter
+            )  # Revert to previous value if invalid input
+        page.update()
 
     def increment_age(e):
         nonlocal age_counter
@@ -31,12 +51,19 @@ def create_student_registration_tab(page: ft.Page):
 
     age_controls = ft.Row(
         [
-            ft.ElevatedButton("-", on_click=decrement_age, width=40),
+            age_label,
+            ft.IconButton(
+                ft.Icons.REMOVE, on_click=decrement_age, tooltip="تقليل العمر"
+            ),
             student_age,
-            ft.ElevatedButton("+", on_click=increment_age, width=40),
+            ft.IconButton(ft.Icons.ADD, on_click=increment_age, tooltip="زيادة العمر"),
         ],
-        alignment=ft.MainAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.START,
+        spacing=10,
     )
+
+    # Add on_change event to handle direct input
+    student_age.on_change = update_age_from_input
 
     # Date picker for birth date
     birth_date = ft.TextField(label="تاريخ الميلاد", read_only=True)
@@ -69,7 +96,9 @@ def create_student_registration_tab(page: ft.Page):
 
     # Photo upload functionality
     photo_path = None
-    photo_preview = ft.Image(src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False)
+    photo_preview = ft.Image(
+        src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False
+    )
     photo_status = ft.Text("لم يتم اختيار صورة", size=12, color=ft.Colors.GREY)
 
     def handle_file_picker_result(e: ft.FilePickerResultEvent):
@@ -79,16 +108,18 @@ def create_student_registration_tab(page: ft.Page):
             photos_dir = "student_photos"
             if not os.path.exists(photos_dir):
                 os.makedirs(photos_dir)
-            
+
             # Copy the file to student_photos directory
             uploaded_file = e.files[0]
             file_extension = os.path.splitext(uploaded_file.name)[1]
-            new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            new_filename = (
+                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            )
             photo_path = os.path.join(photos_dir, new_filename)
-            
+
             # Copy the file
             shutil.copy2(uploaded_file.path, photo_path)
-            
+
             # Update UI
             photo_preview.src = photo_path
             photo_preview.visible = True
@@ -103,13 +134,11 @@ def create_student_registration_tab(page: ft.Page):
         file_picker.pick_files(
             allow_multiple=False,
             allowed_extensions=["jpg", "jpeg", "png", "gif"],
-            dialog_title="اختر صورة الطالب"
+            dialog_title="اختر صورة الطالب",
         )
 
     photo_upload_btn = ft.ElevatedButton(
-        "رفع صورة الطالب",
-        icon=ft.Icons.UPLOAD_FILE,
-        on_click=pick_photo
+        "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
     def add_student(e):
@@ -123,7 +152,7 @@ def create_student_registration_tab(page: ft.Page):
                 dad_job=str(dad_job.value),
                 mum_job=str(mum_job.value),
                 problem=str(problem.value),
-                photo_path=photo_path
+                photo_path=str(photo_path),
             )
 
             if student_id != -1:
@@ -182,7 +211,11 @@ def create_student_registration_tab(page: ft.Page):
     def update_student_table():
         # Get students from database
         students_data = db.get_all_students()
-        student_data_table.rows.clear()
+
+        if student_data_table.rows is None:
+            student_data_table.rows = []
+        else:
+            student_data_table.rows.clear()
 
         for student in students_data:
             student_data_table.rows.append(
@@ -197,8 +230,11 @@ def create_student_registration_tab(page: ft.Page):
                         ft.DataCell(ft.Text(student.get("problem", "-") or "-")),
                         ft.DataCell(
                             ft.Text(
-                                datetime.datetime.fromisoformat(student.get("created_at", "-")).strftime("%Y-%m-%d %H:%M:%S")
-                                if student.get("created_at") else "-"
+                                datetime.datetime.fromisoformat(
+                                    student.get("created_at", "-")
+                                ).strftime("%Y-%m-%d %H:%M:%S")
+                                if student.get("created_at")
+                                else "-"
                             )
                         ),  # New cell for registration date
                     ]
