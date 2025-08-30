@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 from typing import Optional
+from models import ChildTypeEnum
 
 
 class ChildDTO(BaseModel):
@@ -14,6 +15,7 @@ class ChildDTO(BaseModel):
     notes: str | None = None
     child_image: str | None = None
     created_at: datetime | None = None
+    child_type: ChildTypeEnum
 
     model_config = ConfigDict(from_attributes=True)
 

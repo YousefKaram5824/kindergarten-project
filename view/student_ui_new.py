@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from database import get_db, db_session
 from DTOs.child_dto import CreateChildDTO
 from logic.child_logic import ChildService
+from models import ChildTypeEnum
+from view.student_detail_ui import show_student_details
 
 # Color constants
 PAGE_BGCOLOR = "#E3DCCC"
@@ -67,7 +69,9 @@ def create_student_registration_tab(page: ft.Page):
                             icon=ft.Icons.VISIBILITY,
                             icon_color=ft.Colors.BLUE,
                             tooltip="عرض",
-                            on_click=lambda e, child_id=child.id: display_student(child_id)
+                            on_click=lambda e, child_id=child.id: show_student_details(
+                               page, child_id
+                            )
                         ),
                         # Edit icon
                         ft.IconButton(
@@ -117,6 +121,105 @@ def create_student_registration_tab(page: ft.Page):
                 page.update()
 
     def edit_student(child_id):
+     """Open a dialog to edit student info including photo"""
+     with db_session() as db:
+        child = ChildService.get_child_by_id(db, child_id)
+        if not child:
+            return
+
+        # TextFields
+        name_field = ft.TextField(label="اسم الطالب", value=child.name)
+        age_field = ft.TextField(label="العمر", value=str(child.age))
+        phone_field = ft.TextField(label="رقم التليفون", value=child.phone_number or "")
+        dad_job_field = ft.TextField(label="وظيفة الأب", value=child.father_job or "")
+        mum_job_field = ft.TextField(label="وظيفة الأم", value=child.mother_job or "")
+        notes_field = ft.TextField(label="ملاحظات إضافية", multiline=True, value=child.notes or "")
+
+        # Image preview
+        photo_preview = ft.Image(
+            src=child.child_image if child.child_image else "",
+            width=150,
+            height=150,
+            fit=ft.ImageFit.COVER
+        )
+        photo_path = child.child_image  # current photo path
+
+        # FilePicker to change photo
+        def handle_file_picker_result(e: ft.FilePickerResultEvent):
+            nonlocal photo_path
+            if e.files:
+                uploaded_file = e.files[0]
+                photos_dir = "student_photos"
+                if not os.path.exists(photos_dir):
+                    os.makedirs(photos_dir)
+
+                file_extension = os.path.splitext(uploaded_file.name)[1]
+                new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+                photo_path = os.path.join(photos_dir, new_filename)
+                shutil.copy2(uploaded_file.path, photo_path)
+                photo_preview.src = photo_path
+                page.update()
+
+        file_picker = ft.FilePicker(on_result=handle_file_picker_result)
+        page.overlay.append(file_picker)
+
+        def pick_photo(e):
+            file_picker.pick_files(
+                allow_multiple=False,
+                allowed_extensions=["jpg", "jpeg", "png", "gif"],
+                dialog_title="اختر صورة الطالب",
+            )
+
+        photo_button = ft.ElevatedButton("تغيير الصورة", on_click=pick_photo)
+
+        # Save button
+        def save_edit(e):
+            try:
+                updated_data = CreateChildDTO(
+                    name=name_field.value,
+                    age=int(age_field.value),
+                    birth_date=child.birth_date,
+                    phone_number=phone_field.value,
+                    father_job=dad_job_field.value,
+                    mother_job=mum_job_field.value,
+                    notes=notes_field.value,
+                    child_image=photo_path,
+                    created_at=child.created_at
+                )
+                ChildService.update_child(db, child_id, updated_data)
+                update_student_table()
+                page.update()
+                page.close(dialog)
+            except Exception as ex:
+                snackbar = ft.SnackBar(
+                    content=ft.Text(f"خطأ في التحديث: {ex}"),
+                    bgcolor=ft.Colors.RED,
+                    duration=3000,
+                )
+                page.overlay.append(snackbar)
+                snackbar.open = True
+                page.update()
+
+        dialog = ft.AlertDialog(
+            title=ft.Text(f"تعديل بيانات الطالب: {child.name}"),
+            content=ft.Column([
+                name_field,
+                age_field,
+                phone_field,
+                dad_job_field,
+                mum_job_field,
+                notes_field,
+                ft.Row([photo_preview, photo_button], alignment=ft.MainAxisAlignment.CENTER)
+            ]),
+            actions=[
+                ft.TextButton("حفظ", on_click=save_edit),
+                ft.TextButton("إلغاء", on_click=lambda e: page.close(dialog)),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            modal=True
+        )
+        page.open(dialog)
+
         """Edit student details"""
         with db_session() as db:
             child = ChildService.get_child_by_id(db, child_id)
@@ -277,6 +380,9 @@ def create_student_registration_tab(page: ft.Page):
         "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
+    
+
+
     # Add Student Dialog - Matching auth dialog style
     add_student_dialog = ft.AlertDialog(
         modal=True,
@@ -295,6 +401,11 @@ def create_student_registration_tab(page: ft.Page):
                 mum_job,
                 problem,
                 additional_notes,
+
+               
+
+                
+
                 ft.Container(
                     ft.Text("صورة الطالب:", size=16, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
                     padding=ft.padding.only(top=10, bottom=5),
@@ -382,6 +493,7 @@ def create_student_registration_tab(page: ft.Page):
             notes=str(problem.value),
             child_image=photo_path,
             created_at=datetime.datetime.now(),
+            child_type=ChildTypeEnum[child_type_combo.value]
         )
 
         # Add student to database with photo path using ChildService

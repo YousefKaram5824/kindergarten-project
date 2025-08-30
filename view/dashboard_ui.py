@@ -264,7 +264,7 @@ def create_dashboard(page: ft.Page, current_user):
         alignment=ft.MainAxisAlignment.START,
     )
 
-    # Main content area - restructured to have content at the top
+    # Main content area - restructured to stick everything at the top
     content_area = ft.Column(
         [
             ft.Text("مرحباً بك في لوحة التحكم", size=20, weight=ft.FontWeight.BOLD),
@@ -301,6 +301,8 @@ def create_dashboard(page: ft.Page, current_user):
             stats_row,
         ],
         scroll=ft.ScrollMode.AUTO,
+        alignment=ft.MainAxisAlignment.START,          # ✅ stick to top
+        horizontal_alignment=ft.CrossAxisAlignment.START,
     )
 
     # Main layout
@@ -309,9 +311,10 @@ def create_dashboard(page: ft.Page, current_user):
             nav_rail,
             ft.Container(
                 content=ft.Column(
-                    [header, ft.Divider(), content_area], scroll=ft.ScrollMode.AUTO
+                    [header, ft.Divider(), content_area],
+                    alignment=ft.MainAxisAlignment.START,  # ✅ stick to top
+                    horizontal_alignment=ft.CrossAxisAlignment.START,
                 ),
-                expand=True,
                 padding=20,
             ),
         ],
@@ -321,6 +324,157 @@ def create_dashboard(page: ft.Page, current_user):
     # Update statistics
     update_dashboard_stats(stats_row)
 
+    return main_layout
+    """Create and return the main dashboard"""
+    page.clean()
+
+    # Page title
+    if current_user:
+        page.title = f"لوحة تحكم نظام إدارة رياض الأطفال - {current_user.username}"
+    else:
+        page.title = "لوحة تحكم نظام إدارة رياض الأطفال - غير مسجل الدخول"
+
+    financial_records = []
+    inventory_items = []
+
+    # Navigation rail
+    nav_destinations = [
+        ft.NavigationRailDestination(icon=ft.Icons.HOME, selected_icon=ft.Icons.HOME, label="الرئيسية"),
+        ft.NavigationRailDestination(icon=ft.Icons.PERSON, selected_icon=ft.Icons.PERSON, label="الطلاب"),
+        ft.NavigationRailDestination(icon=ft.Icons.ACCOUNT_BALANCE, selected_icon=ft.Icons.ACCOUNT_BALANCE, label="المالية"),
+        ft.NavigationRailDestination(icon=ft.Icons.INVENTORY, selected_icon=ft.Icons.INVENTORY, label="المخزون"),
+        ft.NavigationRailDestination(icon=ft.Icons.ANALYTICS, selected_icon=ft.Icons.ANALYTICS, label="التقارير"),
+    ]
+
+    nav_rail = HoverNavigationRail(
+        destinations=nav_destinations,
+        on_change=lambda e: handle_navigation_change(e, page, current_user, financial_records, inventory_items),
+    )
+
+    # Header
+    header = ft.Row(
+        [
+            ft.IconButton(
+                icon=ft.Icons.ARROW_BACK_ROUNDED,
+                icon_size=24,
+                tooltip="العودة إلى تسجيل الدخول",
+                on_click=lambda e: back_to_login(page),
+            ),
+            ft.Text("لوحة تحكم نظام إدارة رياض الأطفال", size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_700),
+            ft.Container(expand=True),
+            DigitalClock(),
+            ft.Text(
+                f"مرحباً: {current_user.username if current_user else 'زائر'}",
+                size=16,
+                color=ft.Colors.GREY_600,
+            ),
+        ],
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+    )
+
+    # ✅ Statistics row (moved up under header)
+    stats_row = ft.Row(
+        [
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.PEOPLE, size=40, color=ft.Colors.BLUE),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("الطلاب المسجلين", size=14, text_align=ft.TextAlign.CENTER),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                width=160, height=160, padding=10, border_radius=10,
+                bgcolor=ft.Colors.BLUE_50, border=ft.border.all(1, ft.Colors.BLUE_100),
+            ),
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.ACCOUNT_BALANCE_WALLET, size=40, color=ft.Colors.GREEN),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("الإيرادات الشهرية", size=14, text_align=ft.TextAlign.CENTER),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                width=160, height=160, padding=10, border_radius=10,
+                bgcolor=ft.Colors.GREEN_50, border=ft.border.all(1, ft.Colors.GREEN_100),
+            ),
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.INVENTORY_2, size=40, color=ft.Colors.ORANGE),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("عناصر المخزون", size=14, text_align=ft.TextAlign.CENTER),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                width=160, height=160, padding=10, border_radius=10,
+                bgcolor=ft.Colors.ORANGE_50, border=ft.border.all(1, ft.Colors.ORANGE_100),
+            ),
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Icon(ft.Icons.SECURITY, size=40, color=ft.Colors.PURPLE),
+                        ft.Text("1", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("المستخدمين النشطين", size=14, text_align=ft.TextAlign.CENTER),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                width=160, height=160, padding=10, border_radius=10,
+                bgcolor=ft.Colors.PURPLE_50, border=ft.border.all(1, ft.Colors.PURPLE_100),
+            ),
+        ],
+        spacing=20,
+        alignment=ft.MainAxisAlignment.START,
+    )
+
+    # Content (below stats now)
+    content_area = ft.Column(
+        [
+            ft.Text("مرحباً بك في لوحة التحكم", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("هنا يمكنك إدارة جميع جوانب رياض الأطفال بسهولة", size=16),
+            ft.Divider(),
+            ft.Text("الإجراءات السريعة:", size=18, weight=ft.FontWeight.BOLD),
+            ft.Row(
+                [
+                    ft.ElevatedButton(
+                        "تسجيل طالب جديد", icon=ft.Icons.PERSON_ADD,
+                        on_click=lambda e: show_student_tab(page, current_user, financial_records, inventory_items),
+                    ),
+                    ft.ElevatedButton(
+                        "إضافة سجل مالي", icon=ft.Icons.ADD_BUSINESS,
+                        on_click=lambda e: show_financial_tab(page, current_user, financial_records, inventory_items),
+                    ),
+                    ft.ElevatedButton(
+                        "إدارة المخزون", icon=ft.Icons.INVENTORY,
+                        on_click=lambda e: show_inventory_tab(page, current_user, financial_records, inventory_items),
+                    ),
+                ],
+                spacing=10,
+            ),
+            ft.Divider(),
+        ],
+        scroll=ft.ScrollMode.AUTO,
+    )
+
+    # Main layout
+    main_layout = ft.Row(
+        [
+            nav_rail,
+            ft.Container(
+                content=ft.Column([header, ft.Divider(), stats_row, ft.Divider(), content_area], scroll=ft.ScrollMode.AUTO),
+                expand=True, padding=20,
+            ),
+        ],
+        expand=True,
+    )
+
+    # Update stats
+    update_dashboard_stats(stats_row)
     return main_layout
 
 

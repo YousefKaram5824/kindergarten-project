@@ -1,6 +1,13 @@
-from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey, Text, DateTime
+from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey, Text, DateTime,Enum as SQLAEnum
 import datetime
+import enum
 from sqlalchemy.orm import relationship, declarative_base
+from enum import Enum
+
+
+class ChildTypeEnum(enum.Enum):
+    FULL_DAY = "اليوم الكامل"
+    SESSIONS = "جلسات"
 
 Base = declarative_base()
 
@@ -33,6 +40,8 @@ class Child(Base):
     notes = Column(Text)
     child_image = Column(String(255))  # path to the child's image
     created_at = Column(DateTime, default=datetime.datetime.now)
+    child_type = Column(SQLAEnum(ChildTypeEnum), default=ChildTypeEnum.FULL_DAY)
+
 
     # Relation to user who added the child
     created_by_id = Column(Integer, ForeignKey("users.id"))
