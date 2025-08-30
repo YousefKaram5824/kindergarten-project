@@ -3,6 +3,7 @@ from models import TrainingTool
 from DTOs.training_tool_dto import TrainingToolDTO, CreateTrainingToolDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class TrainingToolService:
     @staticmethod
     def create_tool(db: Session, tool_data: CreateTrainingToolDTO) -> TrainingToolDTO:
@@ -23,7 +24,9 @@ class TrainingToolService:
         return [map_to_dto(t, TrainingToolDTO) for t in tools]
 
     @staticmethod
-    def update_tool(db: Session, tool_id: int, tool_data: CreateTrainingToolDTO) -> TrainingToolDTO | None:
+    def update_tool(
+        db: Session, tool_id: int, tool_data: CreateTrainingToolDTO
+    ) -> TrainingToolDTO | None:
         tool = db.query(TrainingTool).filter(TrainingTool.id == tool_id).first()
         if not tool:
             return None

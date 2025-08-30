@@ -1,17 +1,20 @@
-# Photo Upload Feature Implementation
+# Student UI Age Control Updates
 
-## Steps to Complete:
-
-1. [x] Update database schema to add photo_path column to students table
-2. [x] Modify database.py to handle photo path in create_student method
-3. [x] Update student_ui.py to add file upload functionality
-4. [x] Create directory structure for storing student photos
-5. [ ] Test the photo upload functionality
+## Tasks to Complete:
+- [x] Replace age text display with textbox input field
+- [x] Replace text buttons with icon buttons (plus/minus icons)
+- [x] Set initial age to 3 instead of 0
+- [x] Update increment/decrement functions to work with text field
+- [x] Add input validation for numeric values only
+- [x] Ensure proper UI layout and styling
 
 ## Files to Modify:
-- database.py (add photo_path column and update methods)
-- view/student_ui.py (add file picker and photo display)
-- main_app.py (ensure proper file handling setup)
+- view/student_ui_new.py (primary)
 
-## Dependencies:
-- May need to install Pillow for image handling if not already installed
+## Changes Made:
+- Changed `student_age` from `ft.Text` to `ft.TextField` with proper styling
+- Replaced text buttons with `ft.IconButton` using `ft.icons.ADD` and `ft.icons.REMOVE`
+- Set initial age to 3 in both variable and text field
+- Updated `reset_form()` function to reset age to 3
+- Added input filter to only allow numeric input
+- Improved UI styling with proper spacing and button styling

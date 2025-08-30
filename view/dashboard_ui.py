@@ -4,11 +4,13 @@ import asyncio
 
 # Local imports
 from view.auth_ui import set_show_main_system_callback, show_login_page
-from database import get_db
+from database import get_db, db_session
 from view.financial_ui import create_financial_tab
 from view.inventory_ui import create_inventory_tab
 from view.reports_ui import create_reports_tab
-from view.student_ui import create_student_registration_tab
+from view.student_ui_new import create_student_registration_tab
+from logic.child_logic import ChildService
+from logic.tool_for_sale_logic import ToolForSaleService
 
 
 class HoverNavigationRail(ft.Container):
@@ -96,8 +98,11 @@ class DigitalClock(ft.Container):
         self.padding = ft.padding.only(right=10)
 
     def did_mount(self):
+        # Store page reference when control is mounted
+        self._page = self.page
         # Start timer when control is mounted to the page
-        self.page.run_task(self.update_clock)
+        if self.page is not None:
+            self.page.run_task(self.update_clock)
 
     async def update_clock(self):
         while True:
@@ -157,7 +162,7 @@ def create_dashboard(page: ft.Page, current_user):
     header = ft.Row(
         [
             ft.IconButton(
-                icon=ft.Icons.ARROW_BACK,
+                icon=ft.Icons.ARROW_BACK_ROUNDED,
                 icon_size=24,
                 tooltip="العودة إلى تسجيل الدخول",
                 on_click=lambda e: back_to_login(page),
@@ -179,15 +184,15 @@ def create_dashboard(page: ft.Page, current_user):
         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
     )
 
-    # Dashboard statistics cards
+    # Dashboard statistics cards with RTL alignment
     stats_row = ft.Row(
         [
             ft.Container(
                 content=ft.Column(
                     [
                         ft.Icon(ft.Icons.PEOPLE, size=40, color=ft.Colors.BLUE),
-                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD),
-                        ft.Text("الطلاب المسجلين", size=14),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("الطلاب المسجلين", size=14, text_align=ft.TextAlign.CENTER),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -207,8 +212,8 @@ def create_dashboard(page: ft.Page, current_user):
                             size=40,
                             color=ft.Colors.GREEN,
                         ),
-                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD),
-                        ft.Text("الإيرادات الشهرية", size=14),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("الإيرادات الشهرية", size=14, text_align=ft.TextAlign.CENTER),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -224,8 +229,8 @@ def create_dashboard(page: ft.Page, current_user):
                 content=ft.Column(
                     [
                         ft.Icon(ft.Icons.INVENTORY_2, size=40, color=ft.Colors.ORANGE),
-                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD),
-                        ft.Text("عناصر المخزون", size=14),
+                        ft.Text("0", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("عناصر المخزون", size=14, text_align=ft.TextAlign.CENTER),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -241,8 +246,8 @@ def create_dashboard(page: ft.Page, current_user):
                 content=ft.Column(
                     [
                         ft.Icon(ft.Icons.SECURITY, size=40, color=ft.Colors.PURPLE),
-                        ft.Text("1", size=24, weight=ft.FontWeight.BOLD),
-                        ft.Text("المستخدمين النشطين", size=14),
+                        ft.Text("1", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER),
+                        ft.Text("المستخدمين النشطين", size=14, text_align=ft.TextAlign.CENTER),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -256,6 +261,7 @@ def create_dashboard(page: ft.Page, current_user):
             ),
         ],
         spacing=20,
+        alignment=ft.MainAxisAlignment.START,
     )
 
     # Main content area - restructured to have content at the top
@@ -321,17 +327,18 @@ def create_dashboard(page: ft.Page, current_user):
 def update_dashboard_stats(stats_row):
     """Update dashboard statistics with real data"""
     try:
-        # Get students count
-        students = get_db.get_all_students()
-        students_count = len(students)
+        # Get students count using ChildService
+        with db_session() as db:
+            students = ChildService.get_all_children(db)
+            students_count = len(students)
 
-        # Get inventory count
-        inventory = get_db.get_all_inventory()
-        inventory_count = len(inventory)
+            # Get inventory count using ToolForSaleService
+            inventory = ToolForSaleService.get_all_tools(db)
+            inventory_count = len(inventory)
 
-        # Update stats cards
-        stats_row.controls[0].content.controls[1].value = str(students_count)
-        stats_row.controls[2].content.controls[1].value = str(inventory_count)
+            # Update stats cards
+            stats_row.controls[0].content.controls[1].value = str(students_count)
+            stats_row.controls[2].content.controls[1].value = str(inventory_count)
 
     except Exception as e:
         print(f"Error updating dashboard stats: {e}")

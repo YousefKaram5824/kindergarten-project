@@ -3,9 +3,12 @@ from models import DailyFinance
 from DTOs.daily_finance_dto import DailyFinanceDTO, CreateDailyFinanceDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class DailyFinanceService:
     @staticmethod
-    def create_finance(db: Session, finance_data: CreateDailyFinanceDTO) -> DailyFinanceDTO:
+    def create_finance(
+        db: Session, finance_data: CreateDailyFinanceDTO
+    ) -> DailyFinanceDTO:
         finance = map_to_model(finance_data, DailyFinance)
         db.add(finance)
         db.commit()
@@ -23,7 +26,9 @@ class DailyFinanceService:
         return [map_to_dto(f, DailyFinanceDTO) for f in finances]
 
     @staticmethod
-    def update_finance(db: Session, finance_id: int, finance_data: CreateDailyFinanceDTO) -> DailyFinanceDTO | None:
+    def update_finance(
+        db: Session, finance_id: int, finance_data: CreateDailyFinanceDTO
+    ) -> DailyFinanceDTO | None:
         finance = db.query(DailyFinance).filter(DailyFinance.id == finance_id).first()
         if not finance:
             return None

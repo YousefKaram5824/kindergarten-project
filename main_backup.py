@@ -7,10 +7,11 @@ from kindergarten_management import (
     InventoryItem,
     auth_manager,
 )
-from database import db
+from database import db, db_session
 
 # Initialize default admin user
-auth_manager.initialize_default_admin()
+with db_session() as db:
+    auth_manager.initialize_default_admin(db)
 
 
 def main(page: ft.Page):
@@ -67,7 +68,8 @@ def main(page: ft.Page):
             page.update()
             return
 
-        success, result = auth_manager.authenticate(username, password)
+        with db_session() as db:
+            success, result = auth_manager.authenticate(db, username, password)
         if success:
             current_user = result
             show_main_system()
@@ -236,7 +238,8 @@ def main(page: ft.Page):
             page.update()
             return
 
-        success, message = auth_manager.verify_admin(admin_username, admin_password)
+        with db_session() as db:
+            success, message = auth_manager.verify_admin(db, admin_username, admin_password)
         if success:
             admin_error_text.value = "تم التحقق من هوية المدير بنجاح ✓"
             admin_error_text.color = ft.Colors.GREEN
@@ -267,12 +270,14 @@ def main(page: ft.Page):
             page.update()
             return
 
-        success, message = auth_manager.reset_password(
-            username,
-            new_password,
-            admin_username_field.value,
-            admin_password_field.value,
-        )
+        with db_session() as db:
+            success, message = auth_manager.reset_password(
+                db,
+                username,
+                new_password,
+                admin_username_field.value,
+                admin_password_field.value,
+            )
 
         if success:
             reset_success_text.value = message
@@ -360,7 +365,8 @@ def main(page: ft.Page):
             page.update()
             return
 
-        success, message = auth_manager.create_user(username, password, role)
+        with db_session() as db:
+            success, message = auth_manager.create_user(db, username, password, role)
 
         if success:
             create_user_success_text.value = message

@@ -3,6 +3,7 @@ from models import User
 from DTOs.user_dto import UserDTO, CreateUserDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class UserService:
     @staticmethod
     def create_user(db: Session, user_data: CreateUserDTO) -> UserDTO:
@@ -23,7 +24,9 @@ class UserService:
         return [map_to_dto(u, UserDTO) for u in users]
 
     @staticmethod
-    def update_user(db: Session, user_id: int, user_data: CreateUserDTO) -> UserDTO | None:
+    def update_user(
+        db: Session, user_id: int, user_data: CreateUserDTO
+    ) -> UserDTO | None:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return None

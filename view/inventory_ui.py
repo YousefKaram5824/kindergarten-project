@@ -1,16 +1,23 @@
 import flet as ft
+from dataclasses import dataclass
 
 # Local imports
-from kindergarten_management import InventoryItem
+
+
+@dataclass
+class InventoryItem:
+    item_name: str
+    quantity: str
+    purchase_price: str
 
 
 def create_inventory_tab(page: ft.Page):
     """Create and return the inventory management tab"""
     # Inventory Management Form in Arabic
-    item_name = ft.TextField(label="اسم الأداة")
-    item_quantity = ft.TextField(label="الكمية", keyboard_type=ft.KeyboardType.NUMBER)
+    item_name = ft.TextField(label="اسم الأداة", text_align=ft.TextAlign.RIGHT)
+    item_quantity = ft.TextField(label="الكمية", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT)
     purchase_price = ft.TextField(
-        label="سعر الشراء", keyboard_type=ft.KeyboardType.NUMBER
+        label="سعر الشراء", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT
     )
 
     inventory_items = []
@@ -56,15 +63,16 @@ def create_inventory_tab(page: ft.Page):
 
     return ft.Column(
         [
-            ft.Text("إدارة المخزون", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text("إدارة المخزون", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
             ft.Divider(),
             item_name,
             item_quantity,
             purchase_price,
-            add_inventory_btn,
+            ft.Row([add_inventory_btn], alignment=ft.MainAxisAlignment.CENTER),
             ft.Divider(),
-            ft.Text("عناصر المخزون:", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text("عناصر المخزون:", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
             inventory_list,
         ],
         scroll=ft.ScrollMode.AUTO,
+        horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
     )

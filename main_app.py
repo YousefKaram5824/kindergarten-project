@@ -4,11 +4,13 @@ from view.auth_ui import set_show_main_system_callback, show_login_page
 from view.dashboard_ui import show_main_system
 from kindergarten_management import auth_manager
 
+
 # Initialize default admin user
 def init_admin():
     db = next(get_db())
     auth_manager.initialize_default_admin(db)
     db.close()
+
 
 init_admin()
 

@@ -3,6 +3,7 @@ from models import BookForSale
 from DTOs.book_for_sale_dto import BookForSaleDTO, CreateBookForSaleDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class BookForSaleService:
     @staticmethod
     def create_book(db: Session, book_data: CreateBookForSaleDTO) -> BookForSaleDTO:
@@ -23,7 +24,9 @@ class BookForSaleService:
         return [map_to_dto(b, BookForSaleDTO) for b in books]
 
     @staticmethod
-    def update_book(db: Session, book_id: int, book_data: CreateBookForSaleDTO) -> BookForSaleDTO | None:
+    def update_book(
+        db: Session, book_id: int, book_data: CreateBookForSaleDTO
+    ) -> BookForSaleDTO | None:
         book = db.query(BookForSale).filter(BookForSale.id == book_id).first()
         if not book:
             return None

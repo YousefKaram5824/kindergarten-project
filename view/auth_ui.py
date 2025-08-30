@@ -2,6 +2,8 @@ import flet as ft
 
 # Local imports
 from kindergarten_management import auth_manager
+from database import db_session
+
 
 # This will be set by the main application
 show_main_system_callback = None
@@ -14,15 +16,15 @@ def set_show_main_system_callback(callback):
 
 
 def show_forgot_password_dialog(page: ft.Page):
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
     """Show forgot password dialog with admin verification"""
     admin_username_field = ft.TextField(
-        label="اسم المستخدم للمدير", width=300, text_align=ft.TextAlign.RIGHT
+        label="اسم المستخدم للمدير",
+        width=300,
+        text_align=ft.TextAlign.RIGHT,
     )
 
     admin_password_field = ft.TextField(
-        label="كلمة مرور المدير",
+        label="كلمة المرور المدير",
         width=300,
         password=True,
         can_reveal_password=True,
@@ -94,9 +96,10 @@ def show_forgot_password_dialog(page: ft.Page):
             return
 
         # Reset password
-        success, message = auth_manager.reset_password(
-            target_username, new_password, admin_username, admin_password
-        )
+        with db_session() as db:
+            success, message = auth_manager.reset_password(
+                db, target_username, new_password, admin_username, admin_password
+            )
 
         if success:
             success_text.value = message
@@ -107,7 +110,17 @@ def show_forgot_password_dialog(page: ft.Page):
 
         page.update()
 
+    def reset_forgot_password_form():
+        admin_username_field.value = ""
+        admin_password_field.value = ""
+        target_username_field.value = ""
+        new_password_field.value = ""
+        confirm_password_field.value = ""
+        error_text.value = ""
+        success_text.value = ""
+
     def handle_cancel(e):
+        reset_forgot_password_form()
         page.close(dialog)
 
     reset_button.on_click = handle_reset
@@ -227,16 +240,20 @@ def show_create_account_dialog(page: ft.Page):
             return
 
         # Verify admin credentials first
-        admin_auth, admin_msg = auth_manager.verify_admin(
-            admin_username, admin_password
-        )
+        with db_session() as db:
+            admin_auth, admin_msg = auth_manager.verify_admin(
+                db, admin_username, admin_password
+            )
         if not admin_auth:
             error_text.value = admin_msg
             page.update()
             return
 
         # Create new user
-        success, message = auth_manager.create_user(new_username, new_password, role)
+        with db_session() as db:
+            success, message = auth_manager.create_user(
+                db, new_username, new_password, role
+            )
 
         if success:
             success_text.value = message
@@ -247,7 +264,18 @@ def show_create_account_dialog(page: ft.Page):
 
         page.update()
 
+    def reset_create_account_form():
+        admin_username_field.value = ""
+        admin_password_field.value = ""
+        new_username_field.value = ""
+        new_password_field.value = ""
+        confirm_password_field.value = ""
+        role_dropdown.value = "user"
+        error_text.value = ""
+        success_text.value = ""
+
     def handle_cancel(e):
+        reset_create_account_form()
         page.close(dialog)
 
     create_button.on_click = handle_create
@@ -306,7 +334,8 @@ def show_login_page(page: ft.Page):
             page.update()
             return
 
-        success, result = auth_manager.authenticate(username, password)
+        with db_session() as db:
+            success, result = auth_manager.authenticate(db, username, password)
         if success:
             if show_main_system_callback:
                 show_main_system_callback(page, result)
@@ -325,7 +354,7 @@ def show_login_page(page: ft.Page):
         "إنشاء حساب جديد", on_click=lambda e: show_create_account_dialog(page)
     )
 
-    # Layout for login page
+    # Layout for login page with RTL support
     login_page = ft.Column(
         [
             ft.Container(height=150),
@@ -335,10 +364,11 @@ def show_login_page(page: ft.Page):
                 size=32,
                 weight=ft.FontWeight.BOLD,
                 color=ft.Colors.BLUE_700,
+                text_align=ft.TextAlign.CENTER,
             ),
             username_field,
             password_field,
-            login_button,
+            ft.Row([login_button], alignment=ft.MainAxisAlignment.CENTER),
             ft.Row(
                 [forgot_password_link, create_account_link],
                 alignment=ft.MainAxisAlignment.CENTER,

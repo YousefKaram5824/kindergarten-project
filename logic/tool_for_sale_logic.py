@@ -3,6 +3,7 @@ from models import ToolForSale
 from DTOs.tool_for_sale_dto import ToolForSaleDTO, CreateToolForSaleDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class ToolForSaleService:
     @staticmethod
     def create_tool(db: Session, tool_data: CreateToolForSaleDTO) -> ToolForSaleDTO:
@@ -23,7 +24,9 @@ class ToolForSaleService:
         return [map_to_dto(t, ToolForSaleDTO) for t in tools]
 
     @staticmethod
-    def update_tool(db: Session, tool_id: int, tool_data: CreateToolForSaleDTO) -> ToolForSaleDTO | None:
+    def update_tool(
+        db: Session, tool_id: int, tool_data: CreateToolForSaleDTO
+    ) -> ToolForSaleDTO | None:
         tool = db.query(ToolForSale).filter(ToolForSale.id == tool_id).first()
         if not tool:
             return None

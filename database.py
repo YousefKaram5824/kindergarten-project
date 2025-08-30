@@ -46,6 +46,7 @@ engine = create_engine(DATABASE_URL, connect_args=connect_args, echo=False, futu
 from sqlalchemy.engine import Engine
 from sqlalchemy import text
 
+
 @event.listens_for(Engine, "connect")
 def _set_sqlite_pragma(dbapi_connection, connection_record):
     # Only apply for sqlite
@@ -54,8 +55,10 @@ def _set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
+
 # Session factory (use this to create DB sessions)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
 
 # ----------------------------
 # Helpers / Dependency (FastAPI)
@@ -76,6 +79,7 @@ def get_db():
     finally:
         db.close()
 
+
 @contextmanager
 def db_session():
     """
@@ -90,6 +94,7 @@ def db_session():
     finally:
         db.close()
 
+
 # ----------------------------
 # Create tables helper
 # ----------------------------
@@ -100,6 +105,7 @@ def create_tables():
     In production use migrations (Alembic) instead of this function.
     """
     Base.metadata.create_all(bind=engine)
+
 
 # ----------------------------
 # CLI convenience

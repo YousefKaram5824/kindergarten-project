@@ -3,6 +3,7 @@ from models import Child
 from DTOs.child_dto import ChildDTO, CreateChildDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class ChildService:
     @staticmethod
     def create_child(db: Session, child_data: CreateChildDTO) -> ChildDTO:
@@ -16,18 +17,19 @@ class ChildService:
     def get_all_children(db: Session) -> list[ChildDTO]:
         children = db.query(Child).all()
         return [map_to_dto(c, ChildDTO) for c in children]
-    
+
     @staticmethod
-    def update_child(db: Session, child_id: int, child_data: CreateChildDTO) -> ChildDTO | None:
+    def update_child(
+        db: Session, child_id: int, child_data: CreateChildDTO
+    ) -> ChildDTO | None:
         child = db.query(Child).filter(Child.id == child_id).first()
         if not child:
             return None
-        # 
+        #
         update_model_from_dto(child, child_data)
         db.commit()
         db.refresh(child)
         return map_to_dto(child, ChildDTO)
-
 
     @staticmethod
     def delete_child(db: Session, child_id: int) -> bool:
@@ -37,3 +39,10 @@ class ChildService:
         db.delete(child)
         db.commit()
         return True
+
+    @staticmethod
+    def get_child_by_id(db: Session, child_id: int) -> ChildDTO | None:
+        child = db.query(Child).filter(Child.id == child_id).first()
+        if not child:
+            return None
+        return map_to_dto(child, ChildDTO)

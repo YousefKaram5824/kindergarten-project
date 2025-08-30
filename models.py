@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey, Text, DateTime
+import datetime
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -31,6 +32,7 @@ class Child(Base):
     mother_job = Column(String(100))
     notes = Column(Text)
     child_image = Column(String(255))  # path to the child's image
+    created_at = Column(DateTime, default=datetime.datetime.now)
 
     # Relation to user who added the child
     created_by_id = Column(Integer, ForeignKey("users.id"))

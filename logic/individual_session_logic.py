@@ -3,9 +3,12 @@ from models import IndividualSession
 from DTOs.individual_session_dto import IndividualSessionDTO, CreateIndividualSessionDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
+
 class IndividualSessionService:
     @staticmethod
-    def create_session(db: Session, session_data: CreateIndividualSessionDTO) -> IndividualSessionDTO:
+    def create_session(
+        db: Session, session_data: CreateIndividualSessionDTO
+    ) -> IndividualSessionDTO:
         session_obj = map_to_model(session_data, IndividualSession)
         db.add(session_obj)
         db.commit()
@@ -14,7 +17,11 @@ class IndividualSessionService:
 
     @staticmethod
     def get_session(db: Session, session_id: int) -> IndividualSessionDTO | None:
-        session_obj = db.query(IndividualSession).filter(IndividualSession.id == session_id).first()
+        session_obj = (
+            db.query(IndividualSession)
+            .filter(IndividualSession.id == session_id)
+            .first()
+        )
         return map_to_dto(session_obj, IndividualSessionDTO) if session_obj else None
 
     @staticmethod
@@ -23,8 +30,14 @@ class IndividualSessionService:
         return [map_to_dto(s, IndividualSessionDTO) for s in sessions]
 
     @staticmethod
-    def update_session(db: Session, session_id: int, session_data: CreateIndividualSessionDTO) -> IndividualSessionDTO | None:
-        session_obj = db.query(IndividualSession).filter(IndividualSession.id == session_id).first()
+    def update_session(
+        db: Session, session_id: int, session_data: CreateIndividualSessionDTO
+    ) -> IndividualSessionDTO | None:
+        session_obj = (
+            db.query(IndividualSession)
+            .filter(IndividualSession.id == session_id)
+            .first()
+        )
         if not session_obj:
             return None
         session_obj = update_model_from_dto(session_obj, session_data)
@@ -34,7 +47,11 @@ class IndividualSessionService:
 
     @staticmethod
     def delete_session(db: Session, session_id: int) -> bool:
-        session_obj = db.query(IndividualSession).filter(IndividualSession.id == session_id).first()
+        session_obj = (
+            db.query(IndividualSession)
+            .filter(IndividualSession.id == session_id)
+            .first()
+        )
         if not session_obj:
             return False
         db.delete(session_obj)

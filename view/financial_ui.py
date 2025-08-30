@@ -1,17 +1,24 @@
 import flet as ft
+from dataclasses import dataclass
 
 # Local imports
-from kindergarten_management import FinancialRecord
+
+
+@dataclass
+class FinancialRecord:
+    student_name: str
+    monthly_fee: str
+    bus_fee: str = "0"
 
 
 def create_financial_tab(page: ft.Page):
     """Create and return the financial management tab"""
     # Financial Management Form in Arabic
-    financial_student_name = ft.TextField(label="اسم الطالب")
+    financial_student_name = ft.TextField(label="اسم الطالب", text_align=ft.TextAlign.RIGHT)
     monthly_fee = ft.TextField(
-        label="المصروفات الشهرية", keyboard_type=ft.KeyboardType.NUMBER
+        label="المصروفات الشهرية", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT
     )
-    bus_fee = ft.TextField(label="أجرة الباص", keyboard_type=ft.KeyboardType.NUMBER)
+    bus_fee = ft.TextField(label="أجرة الباص", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT)
 
     # Data storage
     financial_records = []
@@ -59,15 +66,16 @@ def create_financial_tab(page: ft.Page):
 
     return ft.Column(
         [
-            ft.Text("الإدارة المالية", size=24, weight=ft.FontWeight.BOLD),
+            ft.Text("الإدارة المالية", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
             ft.Divider(),
             financial_student_name,
             monthly_fee,
             bus_fee,
-            add_financial_btn,
+            ft.Row([add_financial_btn], alignment=ft.MainAxisAlignment.CENTER),
             ft.Divider(),
-            ft.Text("السجلات المالية:", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text("السجلات المالية:", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
             financial_list,
         ],
         scroll=ft.ScrollMode.AUTO,
+        horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
     )

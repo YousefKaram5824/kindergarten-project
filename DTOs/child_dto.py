@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from datetime import date
+from pydantic import BaseModel, ConfigDict
+from datetime import date, datetime
 from typing import Optional
 
 
@@ -12,10 +12,11 @@ class ChildDTO(BaseModel):
     father_job: str | None = None
     mother_job: str | None = None
     notes: str | None = None
-    child_image: str | None = None  
+    child_image: str | None = None
+    created_at: datetime | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CreateChildDTO(BaseModel):
     name: str
@@ -25,4 +26,5 @@ class CreateChildDTO(BaseModel):
     father_job: str | None = None
     mother_job: str | None = None
     notes: str | None = None
-    child_image: str | None = None  
+    child_image: str | None = None
+    created_at: datetime | None = None
