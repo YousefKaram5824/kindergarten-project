@@ -1,20 +1,9 @@
-# Student UI Age Control Updates
+# TODO: Add Combobox for Child Type in Add Student Form
 
-## Tasks to Complete:
-- [x] Replace age text display with textbox input field
-- [x] Replace text buttons with icon buttons (plus/minus icons)
-- [x] Set initial age to 3 instead of 0
-- [x] Update increment/decrement functions to work with text field
-- [x] Add input validation for numeric values only
-- [x] Ensure proper UI layout and styling
-
-## Files to Modify:
-- view/student_ui_new.py (primary)
-
-## Changes Made:
-- Changed `student_age` from `ft.Text` to `ft.TextField` with proper styling
-- Replaced text buttons with `ft.IconButton` using `ft.icons.ADD` and `ft.icons.REMOVE`
-- Set initial age to 3 in both variable and text field
-- Updated `reset_form()` function to reset age to 3
-- Added input filter to only allow numeric input
-- Improved UI styling with proper spacing and button styling
+## Steps to Complete:
+- [ ] Import ChildTypeEnum in view/student_ui_new.py
+- [ ] Add ft.Dropdown for child_type in add_student_dialog
+- [ ] Update add_student() function to include child_type in CreateChildDTO
+- [ ] Update reset_form() to reset child_type dropdown
+- [ ] Update display_student() to show child_type in snackbar
+- [ ] Test the changes by running the app and adding a new student

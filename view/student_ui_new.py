@@ -7,26 +7,14 @@ from sqlalchemy.orm import Session
 # Local imports
 from database import get_db, db_session
 from DTOs.child_dto import CreateChildDTO
-from logic.child_logic import ChildService
 from models import ChildTypeEnum
-from view.student_detail_ui import show_student_details
+from logic.child_logic import ChildService
 
 # Color constants
-PAGE_BGCOLOR = "#E3DCCC"
 INPUT_BGCOLOR = ft.Colors.WHITE
-INPUT_BORDER_COLOR = "#B58B18"  # Gold
-BUTTON_BGCOLOR = "#B58B18"  # Gold
-BUTTON_TEXT_COLOR = ft.Colors.WHITE
-TEXT_COLOR_GOLD = "#B58B18"  # Gold
-TEXT_COLOR_DARK = "#262626"  # Slightly darker text for better contrast
-TEXT_COLOR_TABLE_DATA = ft.Colors.BLACK  # Explicitly black for table data cells
-FONT_FAMILY_REGULAR = "Tajawal"
-FONT_FAMILY_BOLD = "Tajawal-Bold"
 BORDER_RADIUS = 8
-TABLE_ROW_TEXT = TEXT_COLOR_DARK
 DELETE_BUTTON_COLOR = ft.Colors.RED_700
 TABLE_BORDER_COLOR = ft.Colors.with_opacity(0.5, ft.Colors.BLACK45)
-SEARCH_ICON_COLOR = "#6B6B6B"
 
 
 def create_student_registration_tab(page: ft.Page):
@@ -69,26 +57,30 @@ def create_student_registration_tab(page: ft.Page):
                             icon=ft.Icons.VISIBILITY,
                             icon_color=ft.Colors.BLUE,
                             tooltip="عرض",
-                            on_click=lambda e, child_id=child.id: show_student_details(
-                               page, child_id
-                            )
+                            on_click=lambda e, child_id=child.id: display_student(
+                                child_id
+                            ),
                         ),
                         # Edit icon
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             icon_color=ft.Colors.ORANGE,
                             tooltip="تعديل",
-                            on_click=lambda e, child_id=child.id: edit_student(child_id)
+                            on_click=lambda e, child_id=child.id: edit_student(
+                                child_id
+                            ),
                         ),
                         # Delete icon
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             icon_color=ft.Colors.RED,
                             tooltip="حذف",
-                            on_click=lambda e, child_id=child.id: delete_student(child_id)
+                            on_click=lambda e, child_id=child.id: delete_student(
+                                child_id
+                            ),
                         ),
                     ],
-                    spacing=5
+                    spacing=5,
                 )
 
                 student_data_table.rows.append(
@@ -121,105 +113,6 @@ def create_student_registration_tab(page: ft.Page):
                 page.update()
 
     def edit_student(child_id):
-     """Open a dialog to edit student info including photo"""
-     with db_session() as db:
-        child = ChildService.get_child_by_id(db, child_id)
-        if not child:
-            return
-
-        # TextFields
-        name_field = ft.TextField(label="اسم الطالب", value=child.name)
-        age_field = ft.TextField(label="العمر", value=str(child.age))
-        phone_field = ft.TextField(label="رقم التليفون", value=child.phone_number or "")
-        dad_job_field = ft.TextField(label="وظيفة الأب", value=child.father_job or "")
-        mum_job_field = ft.TextField(label="وظيفة الأم", value=child.mother_job or "")
-        notes_field = ft.TextField(label="ملاحظات إضافية", multiline=True, value=child.notes or "")
-
-        # Image preview
-        photo_preview = ft.Image(
-            src=child.child_image if child.child_image else "",
-            width=150,
-            height=150,
-            fit=ft.ImageFit.COVER
-        )
-        photo_path = child.child_image  # current photo path
-
-        # FilePicker to change photo
-        def handle_file_picker_result(e: ft.FilePickerResultEvent):
-            nonlocal photo_path
-            if e.files:
-                uploaded_file = e.files[0]
-                photos_dir = "student_photos"
-                if not os.path.exists(photos_dir):
-                    os.makedirs(photos_dir)
-
-                file_extension = os.path.splitext(uploaded_file.name)[1]
-                new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
-                photo_path = os.path.join(photos_dir, new_filename)
-                shutil.copy2(uploaded_file.path, photo_path)
-                photo_preview.src = photo_path
-                page.update()
-
-        file_picker = ft.FilePicker(on_result=handle_file_picker_result)
-        page.overlay.append(file_picker)
-
-        def pick_photo(e):
-            file_picker.pick_files(
-                allow_multiple=False,
-                allowed_extensions=["jpg", "jpeg", "png", "gif"],
-                dialog_title="اختر صورة الطالب",
-            )
-
-        photo_button = ft.ElevatedButton("تغيير الصورة", on_click=pick_photo)
-
-        # Save button
-        def save_edit(e):
-            try:
-                updated_data = CreateChildDTO(
-                    name=name_field.value,
-                    age=int(age_field.value),
-                    birth_date=child.birth_date,
-                    phone_number=phone_field.value,
-                    father_job=dad_job_field.value,
-                    mother_job=mum_job_field.value,
-                    notes=notes_field.value,
-                    child_image=photo_path,
-                    created_at=child.created_at
-                )
-                ChildService.update_child(db, child_id, updated_data)
-                update_student_table()
-                page.update()
-                page.close(dialog)
-            except Exception as ex:
-                snackbar = ft.SnackBar(
-                    content=ft.Text(f"خطأ في التحديث: {ex}"),
-                    bgcolor=ft.Colors.RED,
-                    duration=3000,
-                )
-                page.overlay.append(snackbar)
-                snackbar.open = True
-                page.update()
-
-        dialog = ft.AlertDialog(
-            title=ft.Text(f"تعديل بيانات الطالب: {child.name}"),
-            content=ft.Column([
-                name_field,
-                age_field,
-                phone_field,
-                dad_job_field,
-                mum_job_field,
-                notes_field,
-                ft.Row([photo_preview, photo_button], alignment=ft.MainAxisAlignment.CENTER)
-            ]),
-            actions=[
-                ft.TextButton("حفظ", on_click=save_edit),
-                ft.TextButton("إلغاء", on_click=lambda e: page.close(dialog)),
-            ],
-            actions_alignment=ft.MainAxisAlignment.END,
-            modal=True
-        )
-        page.open(dialog)
-
         """Edit student details"""
         with db_session() as db:
             child = ChildService.get_child_by_id(db, child_id)
@@ -290,31 +183,69 @@ def create_student_registration_tab(page: ft.Page):
                 page.open(dialog)
 
     # Form fields
-    student_name = ft.TextField(label="اسم الطالب", text_align=ft.TextAlign.RIGHT)
+    student_name = ft.TextField(
+        label="اسم الطالب",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
     student_age = ft.TextField(
-        value="3", 
+        value="3",
         text_align=ft.TextAlign.CENTER,
         width=60,
         height=40,
         content_padding=ft.padding.all(8),
         border_radius=ft.border_radius.all(BORDER_RADIUS),
-        border_color=INPUT_BORDER_COLOR,
+        border_color=ft.Colors.BLUE,
         bgcolor=INPUT_BGCOLOR,
-        input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string="")
+        input_filter=ft.InputFilter(
+            allow=True, regex_string=r"[0-9]", replacement_string=""
+        ),
     )
     age_counter = 3
-    birth_date = ft.TextField(label="تاريخ الميلاد", read_only=True, text_align=ft.TextAlign.RIGHT)
+    birth_date = ft.TextField(
+        label="تاريخ الميلاد",
+        read_only=True,
+        text_align=ft.TextAlign.RIGHT,
+        width=200,
+    )
     selected_date = None
-    phone = ft.TextField(label="رقم التليفون", text_align=ft.TextAlign.RIGHT)
-    dad_job = ft.TextField(label="وظيفة الأب", text_align=ft.TextAlign.RIGHT)
-    mum_job = ft.TextField(label="وظيفة الأم", text_align=ft.TextAlign.RIGHT)
-    problem = ft.TextField(label="المشكلة", multiline=True, text_align=ft.TextAlign.RIGHT)
-    additional_notes = ft.TextField(label="ملاحظات إضافية", multiline=True, text_align=ft.TextAlign.RIGHT)
+    phone = ft.TextField(
+        label="رقم التليفون",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
+    dad_job = ft.TextField(
+        label="وظيفة الأب",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
+    mum_job = ft.TextField(
+        label="وظيفة الأم",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
+    problem = ft.TextField(
+        label="المشكلة",
+        multiline=True,
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
+    additional_notes = ft.TextField(
+        label="ملاحظات إضافية",
+        multiline=True,
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+    )
     photo_path = None
     photo_preview = ft.Image(
         src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False
     )
-    photo_status = ft.Text("لم يتم اختيار صورة", size=12, color=ft.Colors.GREY, text_align=ft.TextAlign.RIGHT)
+    photo_status = ft.Text(
+        "لم يتم اختيار صورة",
+        size=12,
+        color=ft.Colors.GREY,
+        text_align=ft.TextAlign.RIGHT,
+    )
 
     def increment_age(e):
         nonlocal age_counter
@@ -337,9 +268,11 @@ def create_student_registration_tab(page: ft.Page):
                 icon_size=20,
                 style=ft.ButtonStyle(
                     bgcolor=ft.Colors.WHITE,
-                    color=BUTTON_BGCOLOR,
-                    shape=ft.RoundedRectangleBorder(radius=ft.border_radius.all(BORDER_RADIUS))
-                )
+                    color=ft.Colors.BLUE,
+                    shape=ft.RoundedRectangleBorder(
+                        radius=ft.border_radius.all(BORDER_RADIUS)
+                    ),
+                ),
             ),
             student_age,
             ft.IconButton(
@@ -348,9 +281,11 @@ def create_student_registration_tab(page: ft.Page):
                 icon_size=20,
                 style=ft.ButtonStyle(
                     bgcolor=ft.Colors.WHITE,
-                    color=BUTTON_BGCOLOR,
-                    shape=ft.RoundedRectangleBorder(radius=ft.border_radius.all(BORDER_RADIUS))
-                )
+                    color=ft.Colors.BLUE,
+                    shape=ft.RoundedRectangleBorder(
+                        radius=ft.border_radius.all(BORDER_RADIUS)
+                    ),
+                ),
             ),
         ],
         alignment=ft.MainAxisAlignment.CENTER,
@@ -380,9 +315,6 @@ def create_student_registration_tab(page: ft.Page):
         "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
-    
-
-
     # Add Student Dialog - Matching auth dialog style
     add_student_dialog = ft.AlertDialog(
         modal=True,
@@ -391,23 +323,26 @@ def create_student_registration_tab(page: ft.Page):
             [
                 student_name,
                 ft.Container(
-                    ft.Text("العمر:", size=16, text_align=ft.TextAlign.RIGHT), padding=ft.padding.only(bottom=5)
+                    ft.Text("العمر:", size=16, text_align=ft.TextAlign.RIGHT),
+                    padding=ft.padding.only(bottom=5),
                 ),
                 age_controls,
-                birth_date,
-                ft.Container(date_picker_btn, padding=ft.padding.only(bottom=10)),
+                ft.Row(
+                    [date_picker_btn, birth_date],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
                 phone,
                 dad_job,
                 mum_job,
                 problem,
                 additional_notes,
-
-               
-
-                
-
                 ft.Container(
-                    ft.Text("صورة الطالب:", size=16, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
+                    ft.Text(
+                        "صورة الطالب:",
+                        size=16,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.RIGHT,
+                    ),
                     padding=ft.padding.only(top=10, bottom=5),
                 ),
                 photo_upload_btn,
@@ -493,7 +428,6 @@ def create_student_registration_tab(page: ft.Page):
             notes=str(problem.value),
             child_image=photo_path,
             created_at=datetime.datetime.now(),
-            child_type=ChildTypeEnum[child_type_combo.value]
         )
 
         # Add student to database with photo path using ChildService

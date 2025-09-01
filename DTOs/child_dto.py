@@ -30,3 +30,4 @@ class CreateChildDTO(BaseModel):
     notes: str | None = None
     child_image: str | None = None
     created_at: datetime | None = None
+    child_type: ChildTypeEnum = ChildTypeEnum.FULL_DAY
