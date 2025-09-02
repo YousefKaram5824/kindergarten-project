@@ -6,7 +6,7 @@ from database import db_session
 from logic.child_logic import ChildService
 
 
-def show_student_details_page(page: ft.Page, child_id: int, current_user=None):
+def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
     """Show detailed page for a specific student"""
     # Fetch student data
     with db_session() as db:
@@ -33,10 +33,10 @@ def show_student_details_page(page: ft.Page, child_id: int, current_user=None):
         """Navigate back to student table"""
         page.clean()
         # Import here to avoid circular imports
-        from view.student_ui_new import create_student_registration_tab
+        from view.child_ui_new import create_child_registration_tab
         from view.dashboard_ui import create_back_button
 
-        student_tab = create_student_registration_tab(page, current_user)
+        student_tab = create_child_registration_tab(page, current_user)
         page.add(create_back_button(page, current_user))
         page.add(student_tab)
         page.update()

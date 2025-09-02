@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FinancialRecord:
-    student_name: str
+    child_name: str
     monthly_fee: str
     bus_fee: str = "0"
 
@@ -14,24 +14,32 @@ class FinancialRecord:
 def create_financial_tab(page: ft.Page):
     """Create and return the financial management tab"""
     # Financial Management Form in Arabic
-    financial_student_name = ft.TextField(label="اسم الطالب", text_align=ft.TextAlign.RIGHT)
-    monthly_fee = ft.TextField(
-        label="المصروفات الشهرية", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT
+    financial_child_name = ft.TextField(
+        label="اسم الطالب", text_align=ft.TextAlign.RIGHT
     )
-    bus_fee = ft.TextField(label="أجرة الباص", keyboard_type=ft.KeyboardType.NUMBER, text_align=ft.TextAlign.RIGHT)
+    monthly_fee = ft.TextField(
+        label="المصروفات الشهرية",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        text_align=ft.TextAlign.RIGHT,
+    )
+    bus_fee = ft.TextField(
+        label="أجرة الباص",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        text_align=ft.TextAlign.RIGHT,
+    )
 
     # Data storage
     financial_records = []
 
     def add_financial_record(e):
-        if financial_student_name.value and monthly_fee.value:
+        if financial_child_name.value and monthly_fee.value:
             record = FinancialRecord(
-                student_name=financial_student_name.value,
+                child_name=financial_child_name.value,
                 monthly_fee=monthly_fee.value,
-                bus_fee=bus_fee.value,
+                bus_fee=bus_fee.value, # type: ignore
             )
             financial_records.append(record)
-            financial_student_name.value = ""
+            financial_child_name.value = ""
             monthly_fee.value = ""
             bus_fee.value = ""
             update_financial_list()
@@ -57,7 +65,7 @@ def create_financial_tab(page: ft.Page):
         for record in financial_records:
             financial_list.controls.append(
                 ft.ListTile(
-                    title=ft.Text(record.student_name),
+                    title=ft.Text(record.child_name),
                     subtitle=ft.Text(
                         f"شهري: ${record.monthly_fee}, باص: ${record.bus_fee}"
                     ),
@@ -66,14 +74,24 @@ def create_financial_tab(page: ft.Page):
 
     return ft.Column(
         [
-            ft.Text("الإدارة المالية", size=24, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
+            ft.Text(
+                "الإدارة المالية",
+                size=24,
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.RIGHT,
+            ),
             ft.Divider(),
-            financial_student_name,
+            financial_child_name,
             monthly_fee,
             bus_fee,
             ft.Row([add_financial_btn], alignment=ft.MainAxisAlignment.CENTER),
             ft.Divider(),
-            ft.Text("السجلات المالية:", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.RIGHT),
+            ft.Text(
+                "السجلات المالية:",
+                size=18,
+                weight=ft.FontWeight.BOLD,
+                text_align=ft.TextAlign.RIGHT,
+            ),
             financial_list,
         ],
         scroll=ft.ScrollMode.AUTO,

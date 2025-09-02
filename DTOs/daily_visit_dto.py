@@ -17,6 +17,7 @@ class DailyVisitDTO(BaseModel):
 
 
 class CreateDailyVisitDTO(BaseModel):
+    child_id:Optional[int]
     value: Optional[float]
     appointment: Optional[str]
     date: Optional[date]

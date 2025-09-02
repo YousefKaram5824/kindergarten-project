@@ -8,7 +8,7 @@ from database import get_db, db_session
 from DTOs.child_dto import CreateChildDTO
 from models import ChildTypeEnum
 from logic.child_logic import ChildService
-from view.student_details_ui import show_student_details_page
+from view.child_details_ui import show_child_details_page
 
 # Color constants
 INPUT_BGCOLOR = ft.Colors.WHITE
@@ -17,12 +17,12 @@ DELETE_BUTTON_COLOR = ft.Colors.RED_700
 TABLE_BORDER_COLOR = ft.Colors.with_opacity(0.5, ft.Colors.BLACK45)
 
 
-def create_student_registration_tab(page: ft.Page, current_user=None):
-    """Create and return the student registration tab"""
+def create_child_registration_tab(page: ft.Page, current_user=None):
+    """Create and return the child registration tab"""
 
-    # Search field for filtering students
+    # Search field for filtering childs
     def on_search_change(e):
-        update_student_table(search_field.value or "")
+        update_child_table(search_field.value or "")
 
     search_field = ft.TextField(
         label="بحث",
@@ -33,8 +33,8 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         suffix_icon=ft.Icons.SEARCH,
     )
 
-    # Student table with database integration
-    student_data_table = ft.DataTable(
+    # child table with database integration
+    child_data_table = ft.DataTable(
         columns=[
             ft.DataColumn(ft.Text("الاسم")),
             ft.DataColumn(ft.Text("العمر")),
@@ -55,18 +55,18 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         column_spacing=20,
     )
 
-    def update_student_table(search_query: str = ""):
-        # Get students from database using ChildService with search
+    def update_child_table(search_query: str = ""):
+        # Get childs from database using ChildService with search
         with db_session() as db:
             children_dto = ChildService.search_children(db, search_query)
 
-            if student_data_table.rows is None:
-                student_data_table.rows = []
+            if child_data_table.rows is None:
+                child_data_table.rows = []
             else:
-                student_data_table.rows.clear()
+                child_data_table.rows.clear()
 
             for child in children_dto:
-                # Create action icons for each student
+                # Create action icons for each child
                 action_icons = ft.Row(
                     [
                         # Display icon
@@ -74,7 +74,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                             icon=ft.Icons.VISIBILITY,
                             icon_color=ft.Colors.BLUE,
                             tooltip="عرض",
-                            on_click=lambda e, child_id=child.id: display_student(
+                            on_click=lambda e, child_id=child.id: display_child(
                                 child_id
                             ),
                         ),
@@ -83,16 +83,14 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                             icon=ft.Icons.EDIT,
                             icon_color=ft.Colors.ORANGE,
                             tooltip="تعديل",
-                            on_click=lambda e, child_id=child.id: edit_student(
-                                child_id
-                            ),
+                            on_click=lambda e, child_id=child.id: edit_child(child_id),
                         ),
                         # Delete icon
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             icon_color=ft.Colors.RED,
                             tooltip="حذف",
-                            on_click=lambda e, child_id=child.id: delete_student(
+                            on_click=lambda e, child_id=child.id: delete_child(
                                 child_id
                             ),
                         ),
@@ -100,7 +98,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                     spacing=5,
                 )
 
-                student_data_table.rows.append(
+                child_data_table.rows.append(
                     ft.DataRow(
                         cells=[
                             ft.DataCell(ft.Text(child.name)),
@@ -128,23 +126,23 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
             page.update()
 
     # Action handlers for the icons
-    def display_student(child_id):
-        """Display student details"""
-        show_student_details_page(page, child_id, current_user)
+    def display_child(child_id):
+        """Display child details"""
+        show_child_details_page(page, child_id, current_user)
 
     current_edit_child_id = None
 
-    def edit_student(child_id):
-        """Edit student details"""
+    def edit_child(child_id):
+        """Edit child details"""
         nonlocal current_edit_child_id
         with db_session() as db:
             child = ChildService.get_child_by_id(db, child_id)
             if child:
                 current_edit_child_id = child_id
                 # Populate edit form with child data
-                edit_student_name.value = child.name
+                edit_child_name.value = child.name
                 edit_age_counter = child.age or 3
-                edit_student_age.value = str(edit_age_counter)
+                edit_child_age.value = str(edit_age_counter)
                 edit_birth_date.value = (
                     child.birth_date.strftime("%Y-%m-%d") if child.birth_date else ""
                 )
@@ -171,10 +169,10 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                 edit_child_type_dropdown.value = edit_selected_child_type.name
 
                 # Open edit dialog
-                page.open(edit_student_dialog)
+                page.open(edit_child_dialog)
 
-    def delete_student(child_id):
-        """Delete student"""
+    def delete_child(child_id):
+        """Delete child"""
         with db_session() as db:
             child = ChildService.get_child_by_id(db, child_id)
             if child:
@@ -183,7 +181,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                     try:
                         success = ChildService.delete_child(db, child_id)
                         if success:
-                            update_student_table()
+                            update_child_table()
                             snackbar = ft.SnackBar(
                                 content=ft.Text(f"تم حذف الطالب: {child.name}"),
                                 bgcolor=ft.Colors.GREEN,
@@ -227,12 +225,12 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                 page.open(dialog)
 
     # Form fields
-    student_name = ft.TextField(
+    child_name = ft.TextField(
         label="اسم الطالب",
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
-    student_age = ft.TextField(
+    child_age = ft.TextField(
         value="3",
         text_align=ft.TextAlign.CENTER,
         width=60,
@@ -319,14 +317,14 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     def increment_age(e):
         nonlocal age_counter
         age_counter += 1
-        student_age.value = str(age_counter)
+        child_age.value = str(age_counter)
         page.update()
 
     def decrement_age(e):
         nonlocal age_counter
         if age_counter > 0:
             age_counter -= 1
-            student_age.value = str(age_counter)
+            child_age.value = str(age_counter)
         page.update()
 
     age_controls = ft.Row(
@@ -343,7 +341,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                     ),
                 ),
             ),
-            student_age,
+            child_age,
             ft.IconButton(
                 icon=ft.Icons.ADD,
                 on_click=increment_age,
@@ -384,13 +382,13 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
-    # Add Student Dialog - Matching auth dialog style
-    add_student_dialog = ft.AlertDialog(
+    # Add child Dialog - Matching auth dialog style
+    add_child_dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("إضافة طالب جديد", text_align=ft.TextAlign.CENTER),
         content=ft.Column(
             [
-                student_name,
+                child_name,
                 ft.Container(
                     ft.Text("العمر:", size=16, text_align=ft.TextAlign.RIGHT),
                     padding=ft.padding.only(bottom=5),
@@ -430,7 +428,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         ),
         actions=[
             ft.TextButton("إلغاء", on_click=lambda e: [reset_form(), close_dialog()]),
-            ft.TextButton("إضافة", on_click=lambda e: add_student()),
+            ft.TextButton("إضافة", on_click=lambda e: add_child()),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -446,12 +444,12 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     def handle_file_picker_result(e: ft.FilePickerResultEvent):
         nonlocal photo_path
         if e.files:
-            # Create student_photos directory if it doesn't exist
-            photos_dir = "student_photos"
+            # Create child_photos directory if it doesn't exist
+            photos_dir = "child_photos"
             if not os.path.exists(photos_dir):
                 os.makedirs(photos_dir)
 
-            # Copy the file to student_photos directory
+            # Copy the file to child_photos directory
             uploaded_file = e.files[0]
             file_extension = os.path.splitext(uploaded_file.name)[1]
             new_filename = (
@@ -474,12 +472,12 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     page.overlay.append(file_picker)
 
     # Edit form fields (similar to add form)
-    edit_student_name = ft.TextField(
+    edit_child_name = ft.TextField(
         label="اسم الطالب",
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
-    edit_student_age = ft.TextField(
+    edit_child_age = ft.TextField(
         value="3",
         text_align=ft.TextAlign.CENTER,
         width=60,
@@ -566,14 +564,14 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     def edit_increment_age(e):
         nonlocal edit_age_counter
         edit_age_counter += 1
-        edit_student_age.value = str(edit_age_counter)
+        edit_child_age.value = str(edit_age_counter)
         page.update()
 
     def edit_decrement_age(e):
         nonlocal edit_age_counter
         if edit_age_counter > 0:
             edit_age_counter -= 1
-            edit_student_age.value = str(edit_age_counter)
+            edit_child_age.value = str(edit_age_counter)
         page.update()
 
     edit_age_controls = ft.Row(
@@ -590,7 +588,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                     ),
                 ),
             ),
-            edit_student_age,
+            edit_child_age,
             ft.IconButton(
                 icon=ft.Icons.ADD,
                 on_click=edit_increment_age,
@@ -633,13 +631,13 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=edit_pick_photo
     )
 
-    # Edit Student Dialog
-    edit_student_dialog = ft.AlertDialog(
+    # Edit child Dialog
+    edit_child_dialog = ft.AlertDialog(
         modal=True,
         title=ft.Text("تعديل بيانات الطالب", text_align=ft.TextAlign.CENTER),
         content=ft.Column(
             [
-                edit_student_name,
+                edit_child_name,
                 ft.Container(
                     ft.Text("العمر:", size=16, text_align=ft.TextAlign.RIGHT),
                     padding=ft.padding.only(bottom=5),
@@ -679,7 +677,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         ),
         actions=[
             ft.TextButton("إلغاء", on_click=lambda e: close_edit_dialog()),
-            ft.TextButton("حفظ", on_click=lambda e: save_edit_student()),
+            ft.TextButton("حفظ", on_click=lambda e: save_edit_child()),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -695,12 +693,12 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     def edit_handle_file_picker_result(e: ft.FilePickerResultEvent):
         nonlocal edit_photo_path
         if e.files:
-            # Create student_photos directory if it doesn't exist
-            photos_dir = "student_photos"
+            # Create child_photos directory if it doesn't exist
+            photos_dir = "child_photos"
             if not os.path.exists(photos_dir):
                 os.makedirs(photos_dir)
 
-            # Copy the file to student_photos directory
+            # Copy the file to child_photos directory
             uploaded_file = e.files[0]
             file_extension = os.path.splitext(uploaded_file.name)[1]
             new_filename = (
@@ -722,18 +720,18 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
     edit_file_picker = ft.FilePicker(on_result=edit_handle_file_picker_result)
     page.overlay.append(edit_file_picker)
 
-    def save_edit_student():
+    def save_edit_child():
         nonlocal current_edit_child_id
         if not current_edit_child_id:
             show_error("لم يتم العثور على الطالب المراد تعديله!")
             return
 
         # Validate required fields
-        if not edit_student_name.value:
+        if not edit_child_name.value:
             show_error("يجب إدخال اسم الطالب!")
             return
 
-        if not edit_student_age.value or int(edit_student_age.value) <= 0:
+        if not edit_child_age.value or int(edit_child_age.value) <= 0:
             show_error("يجب إدخال عمر صحيح للطالب!")
             return
 
@@ -743,8 +741,8 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
 
         # Create child DTO with updated data
         child_data = CreateChildDTO(
-            name=str(edit_student_name.value),
-            age=int(edit_student_age.value),
+            name=str(edit_child_name.value),
+            age=int(edit_child_age.value),
             birth_date=datetime.datetime.strptime(
                 edit_birth_date.value, "%Y-%m-%d"
             ).date(),
@@ -757,7 +755,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
             child_type=edit_selected_child_type,
         )
 
-        # Update student in database using ChildService
+        # Update child in database using ChildService
         with db_session() as db:
             try:
                 child_dto = ChildService.update_child(
@@ -767,7 +765,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                 if child_dto:
                     # Close dialog and refresh table
                     close_edit_dialog()
-                    update_student_table()
+                    update_child_table()
                     show_success("تم تعديل بيانات الطالب بنجاح!")
                 else:
                     show_error("فشل في تعديل بيانات الطالب!")
@@ -775,15 +773,15 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                 show_error(f"خطأ في تعديل بيانات الطالب: {str(ex)}")
 
     def close_edit_dialog():
-        page.close(edit_student_dialog)
+        page.close(edit_child_dialog)
 
-    def add_student():
+    def add_child():
         # Validate required fields
-        if not student_name.value:
+        if not child_name.value:
             show_error("يجب إدخال اسم الطالب!")
             return
 
-        if not student_age.value or int(student_age.value) <= 0:
+        if not child_age.value or int(child_age.value) <= 0:
             show_error("يجب إدخال عمر صحيح للطالب!")
             return
 
@@ -793,8 +791,8 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
 
         # Create child DTO with current timestamp
         child_data = CreateChildDTO(
-            name=str(student_name.value),
-            age=int(student_age.value),
+            name=str(child_name.value),
+            age=int(child_age.value),
             birth_date=datetime.datetime.strptime(birth_date.value, "%Y-%m-%d").date(),
             phone_number=str(phone.value),
             father_job=str(dad_job.value),
@@ -805,7 +803,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
             child_type=selected_child_type,
         )
 
-        # Add student to database with photo path using ChildService
+        # Add child to database with photo path using ChildService
         with db_session() as db:
             try:
                 child_dto = ChildService.create_child(db, child_data)
@@ -815,8 +813,8 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
                     reset_form()
                     close_dialog()
 
-                    # Refresh student table
-                    update_student_table()
+                    # Refresh child table
+                    update_child_table()
 
                     show_success("تم إضافة الطالب بنجاح!")
                 else:
@@ -850,9 +848,9 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
 
     def reset_form():
         nonlocal age_counter, photo_path, selected_date, selected_child_type
-        student_name.value = ""
+        child_name.value = ""
         age_counter = 3
-        student_age.value = "3"
+        child_age.value = "3"
         birth_date.value = ""
         selected_date = None
         phone.value = ""
@@ -868,26 +866,26 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
         selected_child_type = ChildTypeEnum.FULL_DAY
         child_type_dropdown.value = ChildTypeEnum.FULL_DAY.name
 
-    def open_add_student_dialog(e):
-        page.open(add_student_dialog)
+    def open_add_child_dialog(e):
+        page.open(add_child_dialog)
 
     def close_dialog():
-        page.close(add_student_dialog)
+        page.close(add_child_dialog)
 
-    # Add Student button
-    add_student_btn = ft.ElevatedButton(
-        "إضافة طالب جديد", icon=ft.Icons.ADD, on_click=open_add_student_dialog
+    # Add child button
+    add_child_btn = ft.ElevatedButton(
+        "إضافة طالب جديد", icon=ft.Icons.ADD, on_click=open_add_child_dialog
     )
 
-    # Load initial student data
-    update_student_table()
+    # Load initial child data
+    update_child_table()
 
     return ft.Column(
         [
             ft.Row(
                 [
                     ft.Text("إدارة الطلاب", size=24, weight=ft.FontWeight.BOLD),
-                    add_student_btn,
+                    add_child_btn,
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
@@ -900,7 +898,7 @@ def create_student_registration_tab(page: ft.Page, current_user=None):
             ),
             ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD),
             ft.Container(
-                content=ft.Column([student_data_table], scroll=ft.ScrollMode.AUTO),
+                content=ft.Column([child_data_table], scroll=ft.ScrollMode.AUTO),
                 height=500,
                 padding=10,
                 alignment=ft.alignment.center,

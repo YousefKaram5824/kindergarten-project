@@ -8,7 +8,8 @@ from database import db_session
 from view.financial_ui import create_financial_tab
 from view.inventory_ui import create_inventory_tab
 from view.reports_ui import create_reports_tab
-from view.student_ui_new import create_student_registration_tab
+from view.child_ui_new import create_child_registration_tab
+from view.daily_visit_ui import create_daily_visit_tab
 from logic.child_logic import ChildService
 from logic.tool_for_sale_logic import ToolForSaleService
 from models import ChildTypeEnum
@@ -20,14 +21,15 @@ class HoverNavigationRail(ft.Container):
         self.destinations = destinations
         self.on_change = on_change
         self.is_expanded = False
+        self.collapse_timer = None
 
         # Create the navigation rail
         self.nav_rail = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.NONE,
             min_width=60,
-            min_extended_width=200,
-            group_alignment=-0.9,
+            min_extended_width=80,
+            group_alignment=0.0,  # Center alignment
             destinations=destinations,
             on_change=on_change,
         )
@@ -47,9 +49,11 @@ class HoverNavigationRail(ft.Container):
     def handle_hover(self, e):
         if e.data == "true":
             # Mouse entered - expand
-            if not self.hovered:  # Only expand if not already hovered
-                self.hovered = True
-                self.expand_rail()
+            self.hovered = True
+            if self.collapse_timer:
+                self.collapse_timer.cancel()
+                self.collapse_timer = None
+            self.expand_rail()
         else:
             # Mouse left - collapse after delay
             self.hovered = False
@@ -59,7 +63,7 @@ class HoverNavigationRail(ft.Container):
         if not self.is_expanded:
             self.is_expanded = True
             self.nav_rail.label_type = ft.NavigationRailLabelType.ALL
-            self.width = 80
+            self.width = 100
             self.animate = ft.Animation(
                 duration=300, curve=ft.AnimationCurve.EASE_IN_OUT
             )
@@ -139,31 +143,37 @@ def create_dashboard(page: ft.Page, current_user):
             icon=ft.Icons.HOME,
             selected_icon=ft.Icons.HOME,
             label="الرئيسية",
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.padding.symmetric(vertical=5),
         ),
         ft.NavigationRailDestination(
             icon=ft.Icons.PERSON,
             selected_icon=ft.Icons.PERSON,
             label="الطلاب",
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.padding.symmetric(vertical=5),
+        ),
+        ft.NavigationRailDestination(
+            icon=ft.Icons.CALENDAR_TODAY,
+            selected_icon=ft.Icons.CALENDAR_TODAY,
+            label="الزيارات",
+            padding=ft.padding.symmetric(vertical=5),
         ),
         ft.NavigationRailDestination(
             icon=ft.Icons.ACCOUNT_BALANCE,
             selected_icon=ft.Icons.ACCOUNT_BALANCE,
             label="المالية",
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.padding.symmetric(vertical=5),
         ),
         ft.NavigationRailDestination(
             icon=ft.Icons.INVENTORY,
             selected_icon=ft.Icons.INVENTORY,
             label="المخزون",
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.padding.symmetric(vertical=5),
         ),
         ft.NavigationRailDestination(
             icon=ft.Icons.ANALYTICS,
             selected_icon=ft.Icons.ANALYTICS,
             label="التقارير",
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.padding.symmetric(vertical=5),
         ),
     ]
 
@@ -345,7 +355,7 @@ def create_dashboard(page: ft.Page, current_user):
                     ft.ElevatedButton(
                         "تسجيل طالب جديد",
                         icon=ft.Icons.PERSON_ADD,
-                        on_click=lambda e: show_student_tab(
+                        on_click=lambda e: show_child_tab(
                             page, current_user, financial_records, inventory_items
                         ),
                     ),
@@ -400,10 +410,10 @@ def create_dashboard(page: ft.Page, current_user):
 def update_dashboard_stats(stats_row):
     """Update dashboard statistics with real data"""
     try:
-        # Get students count using ChildService
+        # Get childs count using ChildService
         with db_session() as db:
-            students = ChildService.get_all_children(db)
-            students_count = len(students)
+            childs = ChildService.get_all_children(db)
+            childs_count = len(childs)
 
             # Get inventory count using ToolForSaleService
             inventory = ToolForSaleService.get_all_tools(db)
@@ -414,7 +424,7 @@ def update_dashboard_stats(stats_row):
             sessions_count = ChildService.get_sessions_children_count(db)
 
             # Update stats cards
-            stats_row.controls[0].content.controls[1].value = str(students_count)
+            stats_row.controls[0].content.controls[1].value = str(childs_count)
             stats_row.controls[2].content.controls[1].value = str(inventory_count)
             stats_row.controls[3].content.controls[1].value = str(full_day_count)
             stats_row.controls[4].content.controls[1].value = str(sessions_count)
@@ -424,17 +434,19 @@ def update_dashboard_stats(stats_row):
 
 
 def handle_navigation_change(e, page, current_user, financial_records, inventory_items):
-    """Handle navigation rail selection changes"""
+
     index = e.control.selected_index
     if index == 0:  # Home
         show_dashboard(page, current_user)
-    elif index == 1:  # Students
-        show_student_tab(page, current_user, financial_records, inventory_items)
-    elif index == 2:  # Financial
+    elif index == 1:  # childs
+        show_child_tab(page, current_user, financial_records, inventory_items)
+    elif index == 2:  # Daily Visits
+        show_daily_visit_tab(page, current_user, financial_records, inventory_items)
+    elif index == 3:  # Financial
         show_financial_tab(page, current_user, financial_records, inventory_items)
-    elif index == 3:  # Inventory
+    elif index == 4:  # Inventory
         show_inventory_tab(page, current_user, financial_records, inventory_items)
-    elif index == 4:  # Reports
+    elif index == 5:  # Reports
         show_reports_tab(page, current_user, financial_records, inventory_items)
 
 
@@ -446,13 +458,23 @@ def show_dashboard(page, current_user):
     page.update()
 
 
-def show_student_tab(page, current_user, financial_records, inventory_items):
-    """Show student registration tab"""
+def show_child_tab(page, current_user, financial_records, inventory_items):
+    """Show child registration tab"""
     page.clean()
     page.padding = ft.padding.only(right=20)
-    student_tab = create_student_registration_tab(page)
+    child_tab = create_child_registration_tab(page)
     page.add(create_back_button(page, current_user))
-    page.add(student_tab)
+    page.add(child_tab)
+    page.update()
+
+
+def show_daily_visit_tab(page, current_user, financial_records, inventory_items):
+    """Show daily visit management tab"""
+    page.clean()
+    page.padding = ft.padding.only(right=20)
+    daily_visit_tab = create_daily_visit_tab(page, current_user)
+    page.add(create_back_button(page, current_user))
+    page.add(daily_visit_tab)
     page.update()
 
 
