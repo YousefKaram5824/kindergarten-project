@@ -37,10 +37,14 @@ class Child(Base):
     phone_number = Column(String(20))
     father_job = Column(String(100))
     mother_job = Column(String(100))
-    notes = Column(Text)
+    notes = Column(String(225))
+    problems = Column(String(255))
     child_image = Column(String(255))  # path to the child's image
     created_at = Column(DateTime, default=datetime.datetime.now)
+    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     child_type = Column(SQLAEnum(ChildTypeEnum), default=ChildTypeEnum.FULL_DAY)
+    is_deleted = Column(Boolean, default=False)
+    has_left = Column(Boolean, default=False)
 
 
     # Relation to user who added the child
