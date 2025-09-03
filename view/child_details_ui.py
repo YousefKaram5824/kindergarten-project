@@ -360,6 +360,31 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
                             ),
                             padding=ft.padding.symmetric(vertical=5),
                         ),
+                        ft.Container(
+                            ft.Column(
+                                [
+                                    ft.Text(
+                                        "المشكلة:",
+                                        size=16,
+                                        weight=ft.FontWeight.BOLD,
+                                        text_align=ft.TextAlign.RIGHT,
+                                    ),
+                                    ft.Container(
+                                        ft.Text(
+                                            child.problems if child.problems else "-",
+                                            size=14,
+                                            text_align=ft.TextAlign.RIGHT,
+                                        ),
+                                        padding=ft.padding.all(10),
+                                        border=ft.border.all(1, ft.Colors.GREY_300),
+                                        border_radius=ft.border_radius.all(5),
+                                        bgcolor=ft.Colors.WHITE,
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.START,
+                            ),
+                            padding=ft.padding.symmetric(vertical=5),
+                        ),
                     ]
                 ),
                 padding=ft.padding.all(15),
@@ -367,6 +392,7 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
                 border_radius=ft.border_radius.all(8),
                 bgcolor=ft.Colors.TEAL_50,
                 margin=ft.margin.only(bottom=10),
+                expand=True,
             ),
         ],
         spacing=10,

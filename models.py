@@ -64,7 +64,6 @@ class Child(Base):
     daily_finances = relationship("DailyFinance", back_populates="child")
 
 
-
 # -------------------------------
 # Full Day Program
 # -------------------------------
@@ -202,7 +201,7 @@ class TrainingTool(Base):
     tool_image = Column(String(255))  # path to image
     department = Column(String(100))
     purchase_date = Column(Date)
-    notes = Column(Text)
+    notes = Column(String (1000))
 
 
 # -------------------------------
@@ -217,7 +216,7 @@ class ToolForSale(Base):
     sell_price = Column(Float)
     tool_number = Column(String(50))
     remaining = Column(Integer)
-    notes = Column(Text)
+    notes = Column(String(1000))
 
 
 # -------------------------------
@@ -230,7 +229,7 @@ class UniformForSale(Base):
     buy_price = Column(Float)
     sell_price = Column(Float)
     remaining = Column(Integer)
-    notes = Column(Text)
+    notes = Column(String(1000))
 
 
 # -------------------------------
@@ -244,4 +243,4 @@ class BookForSale(Base):
     buy_price = Column(Float)
     sell_price = Column(Float)
     remaining = Column(Integer)
-    notes = Column(Text)
+    notes = Column(String(1000))

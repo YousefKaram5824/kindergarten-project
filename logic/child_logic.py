@@ -47,10 +47,21 @@ class ChildService:
         child = db.query(Child).filter(Child.id == child_id,Child.is_deleted == False).first()
         if not child:
             return None
-        #
+
+        # Check if new id is available (if changed)
+        if child_data.id != child_id:
+            if child_data.id <= 100:
+                raise ValueError("الرقم التعريفي يجب أن يكون أكبر من 100")
+            if not ChildService.is_id_available(db, child_data.id, exclude_child_id=child_id):
+                raise ValueError(f"الرقم التعريفي {child_data.id} مستخدم من قبل")
+
         update_model_from_dto(child, child_data)
-        child.updated_at = datetime.datetime.now() 
-        db.commit()
+        child.updated_at = datetime.datetime.now()
+        try:
+            db.commit()
+        except SQLAlchemyIntegrityError:
+            db.rollback()
+            raise ValueError("الرقم التعريفي مستخدم بالفعل أو هناك تعارض في قاعدة البيانات")
         db.refresh(child)
         return map_to_dto(child, ChildDTO)
 
@@ -89,7 +100,7 @@ class ChildService:
     @staticmethod
     def get_children_count_by_type(db: Session, child_type: ChildTypeEnum) -> int:
         """Get count of children by child type"""
-        return db.query(Child).filter(Child.child_type == child_type).count()
+        return db.query(Child).filter(Child.child_type == child_type, Child.is_deleted == False).count()
 
     @staticmethod
     def get_full_day_children_count(db: Session) -> int:
@@ -100,3 +111,18 @@ class ChildService:
     def get_sessions_children_count(db: Session) -> int:
         """Get count of sessions children"""
         return ChildService.get_children_count_by_type(db, ChildTypeEnum.SESSIONS)
+
+    @staticmethod
+    def is_id_available(db: Session, child_id: int, exclude_child_id: int = None) -> bool:
+        """Check if child ID is available (not used by another child)"""
+        query = db.query(Child).filter(Child.id == child_id, Child.is_deleted == False)
+        if exclude_child_id:
+            query = query.filter(Child.id != exclude_child_id)
+        existing = query.first()
+        return existing is None
+
+    @staticmethod
+    def get_children_by_type(db: Session, child_type: ChildTypeEnum) -> list[ChildDTO]:
+        """Get list of children filtered by child type"""
+        children = db.query(Child).filter(Child.child_type == child_type, Child.is_deleted == False).all()
+        return [map_to_dto(c, ChildDTO) for c in children]

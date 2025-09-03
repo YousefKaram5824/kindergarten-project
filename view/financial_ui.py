@@ -36,7 +36,7 @@ def create_financial_tab(page: ft.Page):
             record = FinancialRecord(
                 child_name=financial_child_name.value,
                 monthly_fee=monthly_fee.value,
-                bus_fee=bus_fee.value, # type: ignore
+                bus_fee=bus_fee.value,  # type: ignore
             )
             financial_records.append(record)
             financial_child_name.value = ""

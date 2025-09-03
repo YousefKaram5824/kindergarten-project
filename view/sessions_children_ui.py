@@ -2,7 +2,6 @@ import datetime
 import os
 import shutil
 import flet as ft
-from typing import Optional
 
 # Local imports
 from database import db_session
@@ -12,8 +11,6 @@ from logic.child_logic import ChildService
 from view.child_details_ui import show_child_details_page
 from view.add_child_ui import create_add_child_dialog
 from view.edit_child_ui import create_edit_child_dialog
-from view.full_day_children_ui import create_full_day_children_tab
-from view.sessions_children_ui import create_sessions_children_tab
 
 # Color constants
 INPUT_BGCOLOR = ft.Colors.WHITE
@@ -22,17 +19,12 @@ DELETE_BUTTON_COLOR = ft.Colors.RED_700
 TABLE_BORDER_COLOR = ft.Colors.with_opacity(0.5, ft.Colors.BLACK45)
 
 
-def create_child_registration_tab(page: ft.Page, current_user=None):
-    """Create and return the child registration tab"""
-
-    # Current filter state
-    current_filter: dict = {"search_query": "", "child_type": None}
+def create_sessions_children_tab(page: ft.Page, current_user=None):
+    """Create and return the sessions children tab"""
 
     # Search field for filtering childs
     def on_search_change(e):
-        current_filter["search_query"] = search_field.value or ""
-        current_filter["child_type"] = None  # Clear type filter on search
-        update_child_table()
+        update_child_table(search_field.value or "")
 
     search_field = ft.TextField(
         label="بحث",
@@ -41,44 +33,6 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         hint_text="ابحث بالاسم، رقم الهاتف، وظيفة الأب، وظيفة الأم، أو الملاحظات",
         on_change=on_search_change,
         suffix_icon=ft.Icons.SEARCH,
-    )
-
-    # Buttons for navigating to child type pages
-    def show_full_day_children(e):
-        page.clean()
-        page.padding = ft.padding.only(right=20)
-        full_day_tab = create_full_day_children_tab(page, current_user)
-        page.add(create_back_button(page, current_user))
-        page.add(full_day_tab)
-        page.update()
-
-    def show_sessions_children(e):
-        page.clean()
-        page.padding = ft.padding.only(right=20)
-        sessions_tab = create_sessions_children_tab(page, current_user)
-        page.add(create_back_button(page, current_user))
-        page.add(sessions_tab)
-        page.update()
-
-    def show_all_children(e):
-        # Stay on current page, just refresh
-        current_filter["child_type"] = None
-        current_filter["search_query"] = ""
-        search_field.value = ""
-        search_field.update()
-        update_child_table()
-
-    full_day_button = ft.ElevatedButton(
-        text=ChildTypeEnum.FULL_DAY.value,
-        on_click=show_full_day_children,
-    )
-    sessions_button = ft.ElevatedButton(
-        text=ChildTypeEnum.SESSIONS.value,
-        on_click=show_sessions_children,
-    )
-    all_button = ft.ElevatedButton(
-        text="الكل",
-        on_click=show_all_children,
     )
 
     # child table with database integration
@@ -104,19 +58,19 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         column_spacing=20,
     )
 
-    def update_child_table():
-        # Get childs from database using ChildService with search and type filter
+    def update_child_table(search_query: str = ""):
+        # Get sessions children from database using ChildService
         with db_session() as db:
-            if current_filter["child_type"]:
-                children_dto = ChildService.get_children_by_type(
-                    db, current_filter["child_type"]
-                )
-            elif current_filter["search_query"]:
-                children_dto = ChildService.search_children(
-                    db, current_filter["search_query"]
-                )
+            if search_query:
+                # If search query, get all children and filter by type and search
+                all_children = ChildService.search_children(db, search_query)
+                children_dto = [
+                    c for c in all_children if c.child_type == ChildTypeEnum.SESSIONS
+                ]
             else:
-                children_dto = ChildService.get_all_children(db)
+                children_dto = ChildService.get_children_by_type(
+                    db, ChildTypeEnum.SESSIONS
+                )
 
             if child_data_table.rows is None:
                 child_data_table.rows = []
@@ -261,7 +215,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         [
             ft.Row(
                 [
-                    ft.Text("إدارة الطلاب", size=24, weight=ft.FontWeight.BOLD),
+                    ft.Text("طلاب الجلسات", size=24, weight=ft.FontWeight.BOLD),
                     add_child_btn,
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -269,15 +223,13 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.Divider(),
             ft.Row(
                 [
-                    all_button,
-                    full_day_button,
-                    sessions_button,
                     search_field,
                 ],
                 alignment=ft.MainAxisAlignment.START,
-                spacing=10,
             ),
-            ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text(
+                "الطلاب المسجلين في برنامج الجلسات:", size=18, weight=ft.FontWeight.BOLD
+            ),
             ft.Container(
                 content=ft.Column([child_data_table], scroll=ft.ScrollMode.AUTO),
                 height=500,
@@ -288,25 +240,4 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         ],
         scroll=ft.ScrollMode.AUTO,
         expand=True,
-    )
-
-
-def create_back_button(page, current_user):
-    """Create back button to return to dashboard"""
-
-    def back_to_dashboard(e):
-        from view.dashboard_ui import show_dashboard
-
-        show_dashboard(page, current_user)
-
-    return ft.Row(
-        [
-            ft.IconButton(
-                icon=ft.Icons.ARROW_BACK,
-                icon_size=24,
-                tooltip="العودة إلى لوحة التحكم",
-                on_click=back_to_dashboard,
-            ),
-            ft.Text("العودة إلى لوحة التحكم", size=16),
-        ]
     )
