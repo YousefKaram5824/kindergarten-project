@@ -16,7 +16,7 @@ class MonthlyFinanceIndividualDTO(BaseModel):
 
     class Config:
         orm_mode = True
-        from_attributes = True 
+        from_attributes = True
 
 
 class CreateMonthlyFinanceIndividualDTO(BaseModel):

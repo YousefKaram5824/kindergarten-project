@@ -50,9 +50,23 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         label="تاريخ الميلاد",
         read_only=True,
         text_align=ft.TextAlign.RIGHT,
-        width=200,
+        width=210,
     )
     selected_date = None
+    created_at_date = ft.TextField(
+        label="تاريخ التسجيل",
+        read_only=True,
+        text_align=ft.TextAlign.RIGHT,
+        width=170,
+    )
+    created_at_time = ft.TextField(
+        label="وقت التسجيل",
+        read_only=True,
+        text_align=ft.TextAlign.RIGHT,
+        width=170,
+    )
+    selected_created_at_date = None
+    selected_created_at_time = None
     phone = ft.TextField(
         label="رقم التليفون",
         text_align=ft.TextAlign.RIGHT,
@@ -92,29 +106,92 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
     )
 
     # Child type dropdown
-    selected_child_type = ChildTypeEnum.FULL_DAY
-    child_type_dropdown = ft.Dropdown(
-        label="نوع الطالب",
-        width=300,
-        text_align=ft.TextAlign.RIGHT,
-        value=ChildTypeEnum.FULL_DAY.name,
-        options=[
-            ft.dropdown.Option(
-                key=ChildTypeEnum.FULL_DAY.name, text=ChildTypeEnum.FULL_DAY.value
-            ),
-            ft.dropdown.Option(
-                key=ChildTypeEnum.SESSIONS.name, text=ChildTypeEnum.SESSIONS.value
-            ),
-        ],
-        on_change=lambda e: update_selected_child_type(e),
+    selected_child_type = None
+
+    # Checkboxes for child type
+    full_day_checkbox = ft.Checkbox(
+        label=ChildTypeEnum.FULL_DAY.value,
+        value=False,
+        on_change=lambda e: on_checkbox_change(e, ChildTypeEnum.FULL_DAY),
+    )
+    sessions_checkbox = ft.Checkbox(
+        label=ChildTypeEnum.SESSIONS.value,
+        value=False,
+        on_change=lambda e: on_checkbox_change(e, ChildTypeEnum.SESSIONS),
     )
 
-    def update_selected_child_type(e):
+    # Conditional fields
+    monthly_fee = ft.TextField(
+        label="قيمة الاشتراك الشهري",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        input_filter=ft.InputFilter(
+            allow=True, regex_string=r"[0-9.]", replacement_string=""
+        ),
+        visible=False,
+    )
+    bus_fee = ft.TextField(
+        label="قيمة اشتراك الباص",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        input_filter=ft.InputFilter(
+            allow=True, regex_string=r"[0-9.]", replacement_string=""
+        ),
+        visible=False,
+    )
+    session_fee = ft.TextField(
+        label="قيمة الجلسة",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        input_filter=ft.InputFilter(
+            allow=True, regex_string=r"[0-9.]", replacement_string=""
+        ),
+        visible=False,
+    )
+    monthly_sessions_count = ft.TextField(
+        label="عدد الجلسات الشهرية",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        input_filter=ft.InputFilter(
+            allow=True, regex_string=r"[0-9]", replacement_string=""
+        ),
+        visible=False,
+    )
+
+    def on_checkbox_change(e, checkbox_type):
         nonlocal selected_child_type
-        if e.control.value == ChildTypeEnum.FULL_DAY.name:
-            selected_child_type = ChildTypeEnum.FULL_DAY
-        elif e.control.value == ChildTypeEnum.SESSIONS.name:
-            selected_child_type = ChildTypeEnum.SESSIONS
+        if checkbox_type == ChildTypeEnum.FULL_DAY:
+            if e.control.value:
+                selected_child_type = ChildTypeEnum.FULL_DAY
+                sessions_checkbox.value = False
+                # Show full day fields, hide sessions fields
+                monthly_fee.visible = True
+                bus_fee.visible = True
+                session_fee.visible = False
+                monthly_sessions_count.visible = False
+            else:
+                selected_child_type = None
+                monthly_fee.visible = False
+                bus_fee.visible = False
+                session_fee.visible = False
+                monthly_sessions_count.visible = False
+        elif checkbox_type == ChildTypeEnum.SESSIONS:
+            if e.control.value:
+                selected_child_type = ChildTypeEnum.SESSIONS
+                full_day_checkbox.value = False
+                # Show sessions fields, hide full day fields
+                monthly_fee.visible = False
+                bus_fee.visible = False
+                session_fee.visible = True
+                monthly_sessions_count.visible = True
+            else:
+                selected_child_type = None
+                monthly_fee.visible = False
+                bus_fee.visible = False
+                session_fee.visible = False
+                monthly_sessions_count.visible = False
+        # Update UI to reflect changes
+        page.update()
 
     def increment_age(e):
         nonlocal age_counter
@@ -173,6 +250,34 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
 
     date_picker_btn = ft.ElevatedButton("اختر التاريخ", on_click=open_date_picker)
 
+    def handle_created_at_date_picker(e):
+        nonlocal selected_created_at_date
+        if e.control.value:
+            selected_created_at_date = e.control.value
+            created_at_date.value = selected_created_at_date.strftime("%Y-%m-%d")
+            page.update()
+
+    def open_created_at_date_picker(e):
+        page.open(created_at_date_picker)
+
+    created_at_date_picker_btn = ft.ElevatedButton(
+        "اختر تاريخ التسجيل", on_click=open_created_at_date_picker
+    )
+
+    def handle_created_at_time_picker(e):
+        nonlocal selected_created_at_time
+        if e.control.value:
+            selected_created_at_time = e.control.value
+            created_at_time.value = selected_created_at_time.strftime("%H:%M")
+            page.update()
+
+    def open_created_at_time_picker(e):
+        page.open(created_at_time_picker)
+
+    created_at_time_picker_btn = ft.ElevatedButton(
+        "اختر وقت التسجيل", on_click=open_created_at_time_picker
+    )
+
     def pick_photo(e):
         file_picker.pick_files(
             allow_multiple=False,
@@ -201,10 +306,17 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                     [date_picker_btn, birth_date],
                     alignment=ft.MainAxisAlignment.CENTER,
                 ),
+                ft.Row(
+                    [created_at_date_picker_btn, created_at_date],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [created_at_time_picker_btn, created_at_time],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
                 phone,
                 dad_job,
                 mum_job,
-                child_type_dropdown,
                 problem,
                 additional_notes,
                 ft.Container(
@@ -222,6 +334,18 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                     padding=ft.padding.only(top=5, bottom=5),
                 ),
                 ft.Container(photo_status, padding=ft.padding.only(bottom=10)),
+                ft.Container(
+                    ft.Text("نوع الطالب:", size=16, text_align=ft.TextAlign.RIGHT),
+                    padding=ft.padding.only(bottom=5),
+                ),
+                ft.Row(
+                    [full_day_checkbox, sessions_checkbox],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                monthly_fee,
+                bus_fee,
+                session_fee,
+                monthly_sessions_count,
             ],
             width=400,
             height=550,
@@ -243,6 +367,20 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         last_date=datetime.datetime.now(),
     )
     page.overlay.append(date_picker)
+
+    # Date picker for created_at
+    created_at_date_picker = ft.DatePicker(
+        on_change=handle_created_at_date_picker,
+        first_date=datetime.datetime(2000, 1, 1),
+        last_date=datetime.datetime.now(),
+    )
+    page.overlay.append(created_at_date_picker)
+
+    # Time picker for created_at
+    created_at_time_picker = ft.TimePicker(
+        on_change=handle_created_at_time_picker,
+    )
+    page.overlay.append(created_at_time_picker)
 
     def handle_file_picker_result(e: ft.FilePickerResultEvent):
         nonlocal photo_path
@@ -308,7 +446,23 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             show_error("يجب اختيار تاريخ الميلاد!")
             return
 
-        # Create child DTO with current timestamp
+        # Validate created_at date and time if provided
+        created_at_value = None
+        if created_at_date.value and created_at_time.value:
+            try:
+                created_at_value = datetime.datetime.strptime(
+                    f"{created_at_date.value} {created_at_time.value}", "%Y-%m-%d %H:%M"
+                )
+                if created_at_value > datetime.datetime.now():
+                    show_error("تاريخ ووقت التسجيل لا يمكن أن يكون في المستقبل!")
+                    return
+            except ValueError:
+                show_error("صيغة تاريخ أو وقت التسجيل غير صحيحة!")
+                return
+        else:
+            created_at_value = datetime.datetime.now()
+
+        # Create child DTO with created_at value
         child_data = CreateChildDTO(
             id=child_id_int,
             name=str(child_name.value),
@@ -320,8 +474,20 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             notes=str(additional_notes.value) if additional_notes.value else None,
             problems=str(problem.value) if problem.value else None,
             child_image=photo_path,
-            created_at=datetime.datetime.now(),
-            child_type=selected_child_type,
+            created_at=created_at_value,
+            child_type=(
+                selected_child_type
+                if selected_child_type is not None
+                else ChildTypeEnum.FULL_DAY
+            ),
+            monthly_fee=float(monthly_fee.value) if monthly_fee.value else None,
+            bus_fee=float(bus_fee.value) if bus_fee.value else None,
+            session_fee=float(session_fee.value) if session_fee.value else None,
+            monthly_sessions_count=(
+                int(monthly_sessions_count.value)
+                if monthly_sessions_count.value
+                else None
+            ),
         )
 
         # Add child to database with photo path using ChildService
@@ -368,13 +534,17 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         page.update()
 
     def reset_form():
-        nonlocal age_counter, photo_path, selected_date, selected_child_type
+        nonlocal age_counter, photo_path, selected_date, selected_child_type, selected_created_at_date, selected_created_at_time
         child_id.value = ""
         child_name.value = ""
         age_counter = 3
         child_age.value = "3"
         birth_date.value = ""
         selected_date = None
+        created_at_date.value = ""
+        selected_created_at_date = None
+        created_at_time.value = ""
+        selected_created_at_time = None
         phone.value = ""
         dad_job.value = ""
         mum_job.value = ""
@@ -385,8 +555,18 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         photo_preview.visible = False
         photo_status.value = "لم يتم اختيار صورة"
         photo_status.color = ft.Colors.GREY
-        selected_child_type = ChildTypeEnum.FULL_DAY
-        child_type_dropdown.value = ChildTypeEnum.FULL_DAY.name
+        selected_child_type = None
+        full_day_checkbox.value = False
+        sessions_checkbox.value = False
+        monthly_fee.value = ""
+        bus_fee.value = ""
+        session_fee.value = ""
+        monthly_sessions_count.value = ""
+        # Reset visibility
+        monthly_fee.visible = False
+        bus_fee.visible = False
+        session_fee.visible = False
+        monthly_sessions_count.visible = False
 
     def open_add_child_dialog(e):
         page.open(add_child_dialog)

@@ -12,6 +12,10 @@ from view.child_ui_new import create_child_registration_tab
 from view.daily_visit_ui import create_daily_visit_tab
 from logic.child_logic import ChildService
 from logic.tool_for_sale_logic import ToolForSaleService
+from logic.training_tool_logic import TrainingToolService
+from logic.uniform_for_sale_logic import UniformForSaleService
+from logic.book_for_sale_logic import BookForSaleService
+from logic.user_logic import UserService
 from models import ChildTypeEnum
 
 
@@ -212,39 +216,137 @@ def create_dashboard(page: ft.Page, current_user):
     )
 
     # Dashboard statistics cards with RTL alignment
-    stats_row = ft.Row(
-        [
-            ft.Container(
-                content=ft.Column(
-                    [
-                        ft.Icon(ft.Icons.PEOPLE, size=40, color=ft.Colors.BLUE),
-                        ft.Text(
-                            "0",
-                            size=24,
-                            weight=ft.FontWeight.BOLD,
-                            text_align=ft.TextAlign.CENTER,
-                        ),
-                        ft.Text(
-                            "الطلاب المسجلين", size=14, text_align=ft.TextAlign.CENTER
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                ),
-                width=160,
-                height=160,
-                padding=10,
-                border_radius=10,
-                bgcolor=ft.Colors.BLUE_50,
-                border=ft.border.all(1, ft.Colors.BLUE_100),
+    stats_cards = [
+        ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.PEOPLE, size=40, color=ft.Colors.BLUE),
+                    ft.Text(
+                        "0",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text("الطلاب المسجلين", size=14, text_align=ft.TextAlign.CENTER),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             ),
+            width=160,
+            height=160,
+            padding=10,
+            border_radius=10,
+            bgcolor=ft.Colors.BLUE_50,
+            border=ft.border.all(1, ft.Colors.BLUE_100),
+        ),
+        ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(
+                        ft.Icons.ACCOUNT_BALANCE_WALLET,
+                        size=40,
+                        color=ft.Colors.GREEN,
+                    ),
+                    ft.Text(
+                        "0",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "الإيرادات الشهرية", size=14, text_align=ft.TextAlign.CENTER
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            width=160,
+            height=160,
+            padding=10,
+            border_radius=10,
+            bgcolor=ft.Colors.GREEN_50,
+            border=ft.border.all(1, ft.Colors.GREEN_100),
+        ),
+        ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.INVENTORY_2, size=40, color=ft.Colors.ORANGE),
+                    ft.Text(
+                        "0",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text("عناصر المخزون", size=14, text_align=ft.TextAlign.CENTER),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            width=160,
+            height=160,
+            padding=10,
+            border_radius=10,
+            bgcolor=ft.Colors.ORANGE_50,
+            border=ft.border.all(1, ft.Colors.ORANGE_100),
+        ),
+        ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.SCHOOL, size=40, color=ft.Colors.TEAL),
+                    ft.Text(
+                        "0",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text(
+                        "طلاب اليوم الكامل", size=14, text_align=ft.TextAlign.CENTER
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            width=160,
+            height=160,
+            padding=10,
+            border_radius=10,
+            bgcolor=ft.Colors.TEAL_50,
+            border=ft.border.all(1, ft.Colors.TEAL_100),
+        ),
+        ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.ACCESS_TIME, size=40, color=ft.Colors.AMBER),
+                    ft.Text(
+                        "0",
+                        size=24,
+                        weight=ft.FontWeight.BOLD,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.Text("طلاب الجلسات", size=14, text_align=ft.TextAlign.CENTER),
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            width=160,
+            height=160,
+            padding=10,
+            border_radius=10,
+            bgcolor=ft.Colors.AMBER_50,
+            border=ft.border.all(1, ft.Colors.AMBER_100),
+        ),
+    ]
+
+    # Add users card for admin users
+    if current_user and current_user.role == "admin":
+        stats_cards.append(
             ft.Container(
                 content=ft.Column(
                     [
                         ft.Icon(
-                            ft.Icons.ACCOUNT_BALANCE_WALLET,
+                            ft.Icons.ADMIN_PANEL_SETTINGS,
                             size=40,
-                            color=ft.Colors.GREEN,
+                            color=ft.Colors.PURPLE,
                         ),
                         ft.Text(
                             "0",
@@ -252,9 +354,7 @@ def create_dashboard(page: ft.Page, current_user):
                             weight=ft.FontWeight.BOLD,
                             text_align=ft.TextAlign.CENTER,
                         ),
-                        ft.Text(
-                            "الإيرادات الشهرية", size=14, text_align=ft.TextAlign.CENTER
-                        ),
+                        ft.Text("المستخدمين", size=14, text_align=ft.TextAlign.CENTER),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -263,82 +363,13 @@ def create_dashboard(page: ft.Page, current_user):
                 height=160,
                 padding=10,
                 border_radius=10,
-                bgcolor=ft.Colors.GREEN_50,
-                border=ft.border.all(1, ft.Colors.GREEN_100),
-            ),
-            ft.Container(
-                content=ft.Column(
-                    [
-                        ft.Icon(ft.Icons.INVENTORY_2, size=40, color=ft.Colors.ORANGE),
-                        ft.Text(
-                            "0",
-                            size=24,
-                            weight=ft.FontWeight.BOLD,
-                            text_align=ft.TextAlign.CENTER,
-                        ),
-                        ft.Text(
-                            "عناصر المخزون", size=14, text_align=ft.TextAlign.CENTER
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                ),
-                width=160,
-                height=160,
-                padding=10,
-                border_radius=10,
-                bgcolor=ft.Colors.ORANGE_50,
-                border=ft.border.all(1, ft.Colors.ORANGE_100),
-            ),
-            ft.Container(
-                content=ft.Column(
-                    [
-                        ft.Icon(ft.Icons.SCHOOL, size=40, color=ft.Colors.TEAL),
-                        ft.Text(
-                            "0",
-                            size=24,
-                            weight=ft.FontWeight.BOLD,
-                            text_align=ft.TextAlign.CENTER,
-                        ),
-                        ft.Text(
-                            "طلاب اليوم الكامل", size=14, text_align=ft.TextAlign.CENTER
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                ),
-                width=160,
-                height=160,
-                padding=10,
-                border_radius=10,
-                bgcolor=ft.Colors.TEAL_50,
-                border=ft.border.all(1, ft.Colors.TEAL_100),
-            ),
-            ft.Container(
-                content=ft.Column(
-                    [
-                        ft.Icon(ft.Icons.ACCESS_TIME, size=40, color=ft.Colors.AMBER),
-                        ft.Text(
-                            "0",
-                            size=24,
-                            weight=ft.FontWeight.BOLD,
-                            text_align=ft.TextAlign.CENTER,
-                        ),
-                        ft.Text(
-                            "طلاب الجلسات", size=14, text_align=ft.TextAlign.CENTER
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                ),
-                width=160,
-                height=160,
-                padding=10,
-                border_radius=10,
-                bgcolor=ft.Colors.AMBER_50,
-                border=ft.border.all(1, ft.Colors.AMBER_100),
-            ),
-        ],
+                bgcolor=ft.Colors.PURPLE_50,
+                border=ft.border.all(1, ft.Colors.PURPLE_100),
+            )
+        )
+
+    stats_row = ft.Row(
+        stats_cards,
         spacing=20,
         alignment=ft.MainAxisAlignment.START,
     )
@@ -415,9 +446,14 @@ def update_dashboard_stats(stats_row):
             childs = ChildService.get_all_children(db)
             childs_count = len(childs)
 
-            # Get inventory count using ToolForSaleService
-            inventory = ToolForSaleService.get_all_tools(db)
-            inventory_count = len(inventory)
+            # Get total inventory count from all categories
+            training_tools = TrainingToolService.get_all_tools(db)
+            tools_for_sale = ToolForSaleService.get_all_tools(db)
+            uniforms = UniformForSaleService.get_all_uniforms(db)
+            books = BookForSaleService.get_all_books(db)
+            inventory_count = (
+                len(training_tools) + len(tools_for_sale) + len(uniforms) + len(books)
+            )
 
             # Get counts by child type
             full_day_count = ChildService.get_full_day_children_count(db)
@@ -428,6 +464,12 @@ def update_dashboard_stats(stats_row):
             stats_row.controls[2].content.controls[1].value = str(inventory_count)
             stats_row.controls[3].content.controls[1].value = str(full_day_count)
             stats_row.controls[4].content.controls[1].value = str(sessions_count)
+
+            # Update users count for admin users (if users card exists)
+            if len(stats_row.controls) > 5:
+                users = UserService.get_all_users(db)
+                users_count = len(users)
+                stats_row.controls[5].content.controls[1].value = str(users_count)
 
     except Exception as e:
         print(f"Error updating dashboard stats: {e}")

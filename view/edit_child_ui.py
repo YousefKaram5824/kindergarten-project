@@ -307,7 +307,12 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             phone_number=str(edit_phone.value) if edit_phone.value else None,
             father_job=str(edit_dad_job.value) if edit_dad_job.value else None,
             mother_job=str(edit_mum_job.value) if edit_mum_job.value else None,
-            notes=str(edit_problem.value) if edit_problem.value else None,
+            notes=(
+                str(edit_additional_notes.value)
+                if edit_additional_notes.value
+                else None
+            ),
+            problems=str(edit_problem.value) if edit_problem.value else None,
             child_image=edit_photo_path,
             created_at=datetime.datetime.now(),  # Keep original created_at or update?
             child_type=edit_selected_child_type,
@@ -378,7 +383,8 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_phone.value = child.phone_number or ""
                 edit_dad_job.value = child.father_job or ""
                 edit_mum_job.value = child.mother_job or ""
-                edit_problem.value = child.notes or ""
+                edit_problem.value = child.problems or ""
+                edit_additional_notes.value = child.notes or ""
                 edit_additional_notes.value = ""
                 nonlocal edit_photo_path
                 edit_photo_path = child.child_image

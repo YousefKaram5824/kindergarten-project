@@ -305,7 +305,31 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
                                     ),
                                     ft.Text(
                                         (
-                                            child.created_at.strftime("%Y-%m-%d %H:%M")
+                                            child.created_at.strftime("%Y-%m-%d")
+                                            if child.created_at
+                                            else "-"
+                                        ),
+                                        size=16,
+                                        text_align=ft.TextAlign.RIGHT,
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.START,
+                            ),
+                            padding=ft.padding.symmetric(vertical=5),
+                        ),
+                        ft.Container(
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        "وقت التسجيل:",
+                                        size=16,
+                                        weight=ft.FontWeight.BOLD,
+                                        text_align=ft.TextAlign.RIGHT,
+                                        width=120,
+                                    ),
+                                    ft.Text(
+                                        (
+                                            child.created_at.strftime("%H:%M")
                                             if child.created_at
                                             else "-"
                                         ),

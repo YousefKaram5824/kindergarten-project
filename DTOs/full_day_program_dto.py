@@ -27,7 +27,7 @@ class FullDayProgramDTO(BaseModel):
 
     class Config:
         orm_mode = True
-        from_attributes = True 
+        from_attributes = True
 
 
 class CreateFullDayProgramDTO(BaseModel):
@@ -62,7 +62,7 @@ class UpdateFullDayProgramDTO(BaseModel):
     monthly_report: Optional[str] = None
     attendance_status: Optional[str] = None
     notes: Optional[str] = None
-    
+
     personal_photo: Optional[str] = None
     birth_certificate: Optional[str] = None
     father_id_card: Optional[str] = None
@@ -76,4 +76,3 @@ class UpdateFullDayProgramDTO(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
-

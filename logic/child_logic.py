@@ -1,16 +1,15 @@
 from sqlalchemy.orm import Session
-from models import Child, ChildTypeEnum
+from models import Child, ChildTypeEnum, FullDayProgram, IndividualSession
 from DTOs.child_dto import ChildDTO, CreateChildDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 import datetime
 
 
-
 class ChildService:
     @staticmethod
     def create_child(db: Session, child_data: CreateChildDTO) -> ChildDTO:
-        
+
         if not hasattr(child_data, "id") or child_data.id is None:
             raise ValueError("يجب إدخال الرقم التعريفي للطالب")
         if child_data.id <= 100:
@@ -27,11 +26,37 @@ class ChildService:
             child.is_deleted = False
 
         db.add(child)
+
+        # Create related model based on child_type
+        if child_data.child_type == ChildTypeEnum.FULL_DAY:
+            if child_data.monthly_fee is not None or child_data.bus_fee is not None:
+                full_day_program = FullDayProgram(
+                    child_id=child_data.id,
+                    entry_date=datetime.date.today(),
+                    monthly_fee=child_data.monthly_fee,
+                    bus_fee=child_data.bus_fee,
+                )
+                db.add(full_day_program)
+        elif child_data.child_type == ChildTypeEnum.SESSIONS:
+            if (
+                child_data.session_fee is not None
+                or child_data.monthly_sessions_count is not None
+            ):
+                individual_session = IndividualSession(
+                    child_id=child_data.id,
+                    entry_date=datetime.date.today(),
+                    session_fee=child_data.session_fee,
+                    monthly_sessions_count=child_data.monthly_sessions_count,
+                )
+                db.add(individual_session)
+
         try:
             db.commit()
         except SQLAlchemyIntegrityError:
             db.rollback()
-            raise ValueError("الرقم التعريفي مستخدم بالفعل أو هناك تعارض في قاعدة البيانات")
+            raise ValueError(
+                "الرقم التعريفي مستخدم بالفعل أو هناك تعارض في قاعدة البيانات"
+            )
         db.refresh(child)
         return map_to_dto(child, ChildDTO)
 
@@ -44,7 +69,11 @@ class ChildService:
     def update_child(
         db: Session, child_id: int, child_data: CreateChildDTO
     ) -> ChildDTO | None:
-        child = db.query(Child).filter(Child.id == child_id,Child.is_deleted == False).first()
+        child = (
+            db.query(Child)
+            .filter(Child.id == child_id, Child.is_deleted == False)
+            .first()
+        )
         if not child:
             return None
 
@@ -52,7 +81,9 @@ class ChildService:
         if child_data.id != child_id:
             if child_data.id <= 100:
                 raise ValueError("الرقم التعريفي يجب أن يكون أكبر من 100")
-            if not ChildService.is_id_available(db, child_data.id, exclude_child_id=child_id):
+            if not ChildService.is_id_available(
+                db, child_data.id, exclude_child_id=child_id
+            ):
                 raise ValueError(f"الرقم التعريفي {child_data.id} مستخدم من قبل")
 
         update_model_from_dto(child, child_data)
@@ -61,13 +92,19 @@ class ChildService:
             db.commit()
         except SQLAlchemyIntegrityError:
             db.rollback()
-            raise ValueError("الرقم التعريفي مستخدم بالفعل أو هناك تعارض في قاعدة البيانات")
+            raise ValueError(
+                "الرقم التعريفي مستخدم بالفعل أو هناك تعارض في قاعدة البيانات"
+            )
         db.refresh(child)
         return map_to_dto(child, ChildDTO)
 
     @staticmethod
     def delete_child(db: Session, child_id: int) -> bool:
-        child = db.query(Child).filter(Child.id == child_id, Child.is_deleted == False).first()
+        child = (
+            db.query(Child)
+            .filter(Child.id == child_id, Child.is_deleted == False)
+            .first()
+        )
         if not child:
             return False
         child.is_deleted = True
@@ -76,7 +113,11 @@ class ChildService:
 
     @staticmethod
     def get_child_by_id(db: Session, child_id: int) -> ChildDTO | None:
-        child = db.query(Child).filter(Child.id == child_id,Child.is_deleted == False).first()
+        child = (
+            db.query(Child)
+            .filter(Child.id == child_id, Child.is_deleted == False)
+            .first()
+        )
         if not child:
             return None
         return map_to_dto(child, ChildDTO)
@@ -88,19 +129,27 @@ class ChildService:
 
         # Search in name, phone_number, father_job, mother_job, notes
         search_filter = f"%{query}%"
-        children = db.query(Child).filter(
-            (Child.name.ilike(search_filter)) |
-            (Child.phone_number.ilike(search_filter)) |
-            (Child.father_job.ilike(search_filter)) |
-            (Child.mother_job.ilike(search_filter)) |
-            (Child.notes.ilike(search_filter))
-        ).all()
+        children = (
+            db.query(Child)
+            .filter(
+                (Child.name.ilike(search_filter))
+                | (Child.phone_number.ilike(search_filter))
+                | (Child.father_job.ilike(search_filter))
+                | (Child.mother_job.ilike(search_filter))
+                | (Child.notes.ilike(search_filter))
+            )
+            .all()
+        )
         return [map_to_dto(c, ChildDTO) for c in children]
 
     @staticmethod
     def get_children_count_by_type(db: Session, child_type: ChildTypeEnum) -> int:
         """Get count of children by child type"""
-        return db.query(Child).filter(Child.child_type == child_type, Child.is_deleted == False).count()
+        return (
+            db.query(Child)
+            .filter(Child.child_type == child_type, Child.is_deleted == False)
+            .count()
+        )
 
     @staticmethod
     def get_full_day_children_count(db: Session) -> int:
@@ -113,7 +162,9 @@ class ChildService:
         return ChildService.get_children_count_by_type(db, ChildTypeEnum.SESSIONS)
 
     @staticmethod
-    def is_id_available(db: Session, child_id: int, exclude_child_id: int = None) -> bool:
+    def is_id_available(
+        db: Session, child_id: int, exclude_child_id: int = None
+    ) -> bool:
         """Check if child ID is available (not used by another child)"""
         query = db.query(Child).filter(Child.id == child_id, Child.is_deleted == False)
         if exclude_child_id:
@@ -124,5 +175,9 @@ class ChildService:
     @staticmethod
     def get_children_by_type(db: Session, child_type: ChildTypeEnum) -> list[ChildDTO]:
         """Get list of children filtered by child type"""
-        children = db.query(Child).filter(Child.child_type == child_type, Child.is_deleted == False).all()
+        children = (
+            db.query(Child)
+            .filter(Child.child_type == child_type, Child.is_deleted == False)
+            .all()
+        )
         return [map_to_dto(c, ChildDTO) for c in children]

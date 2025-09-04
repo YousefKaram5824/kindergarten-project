@@ -37,3 +37,9 @@ class CreateChildDTO(BaseModel):
     created_at: datetime | None = None
     child_type: ChildTypeEnum = ChildTypeEnum.FULL_DAY
     has_left: Optional[bool] = False
+
+    # New fields for FULL_DAY and SESSIONS
+    monthly_fee: float | None = None
+    bus_fee: float | None = None
+    session_fee: float | None = None
+    monthly_sessions_count: int | None = None
