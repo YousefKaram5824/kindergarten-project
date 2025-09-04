@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import FullDayProgram
-from DTOs.full_day_program_dto import FullDayProgramDTO, CreateFullDayProgramDTO
+from DTOs.full_day_program_dto import FullDayProgramDTO, CreateFullDayProgramDTO, UpdateFullDayProgramDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
@@ -29,7 +29,7 @@ class FullDayProgramService:
 
     @staticmethod
     def update_program(
-        db: Session, program_id: int, program_data: CreateFullDayProgramDTO
+        db: Session, program_id: int, program_data: UpdateFullDayProgramDTO
     ) -> FullDayProgramDTO | None:
         program = (
             db.query(FullDayProgram).filter(FullDayProgram.id == program_id).first()

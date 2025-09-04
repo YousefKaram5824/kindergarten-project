@@ -70,16 +70,26 @@ class Child(Base):
 class FullDayProgram(Base):
     __tablename__ = "full_day_programs"
     id = Column(Integer, primary_key=True)
-    child_id = Column(Integer, ForeignKey("children.id"))
-    entry_date = Column(Date)
-    diagnosis = Column(Text)
-    tests_applied = Column(Text)
-    monthly_fee = Column(Float)
-    bus_fee = Column(Float)
-    training_plan = Column(Text)
-    monthly_report = Column(Text)
-    attendance_status = Column(String(50))  # Regular / Irregular
-    notes = Column(Text)
+    child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
+
+    entry_date = Column(Date, nullable=False)                         # تاريخ الدخول
+    diagnosis = Column(String(500))                                   # التشخيص
+
+    monthly_fee = Column(Float)                                       # قيمة الاشتراك الشهري
+    bus_fee = Column(Float)                                           # قيمة اشتراك الباص
+
+    personal_photo = Column(String(255), nullable=True)               # صورة شخصية (مسار/رابط)
+    birth_certificate = Column(String(255), nullable=True)            # شهادة الميلاد
+    father_id_card = Column(String(255), nullable=True)               # بطاقة الأب
+    test_documents = Column(String(255), nullable=True)               # ملفات أو صور للاختبارات
+
+    tests_applied_file = Column(String(255), nullable=True)           # ملف الاختبارات المطبقة
+    training_plan_file = Column(String(255), nullable=True)           # ملف الخطة التدريبية
+    monthly_report_file = Column(String(255), nullable=True)          # ملف التقرير الشهري
+    child_documents_file = Column(String(255), nullable=True)         # ملف الأوراق الخاصة بالطفل (لو مجمعينها في ملف واحد)
+
+    notes = Column(String(1000))                                      # ملاحظات إضافية
+    attendance_status = Column(String(50))                            # Regular / Irregular
 
     child = relationship("Child", back_populates="full_day_program")
 
@@ -89,17 +99,26 @@ class FullDayProgram(Base):
 # -------------------------------
 class IndividualSession(Base):
     __tablename__ = "individual_sessions"
+
     id = Column(Integer, primary_key=True)
-    child_id = Column(Integer, ForeignKey("children.id"))
-    entry_date = Column(Date)
-    diagnosis = Column(Text)
-    tests_applied = Column(Text)
+    child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
+
+    entry_date = Column(Date, nullable=False)
+    diagnosis = Column(String(500))  # التشخيص
+    tests_applied_file = Column(String(255))  # ملفات الاختبارات المطبقة
     session_fee = Column(Float)
     monthly_sessions_count = Column(Integer)
     attended_sessions_count = Column(Integer)
     specialist_name = Column(String(100))
-    monthly_report = Column(Text)
-    notes = Column(Text)
+    monthly_report_file = Column(String(255))  # ملفات التقرير الشهري
+
+    
+    personal_photo = Column(String(255), nullable=True)        # صورة شخصية
+    birth_certificate = Column(String(255), nullable=True)     # شهادة الميلاد
+    father_id_card = Column(String(255), nullable=True)        # بطاقة الأب
+    child_documents_file = Column(String(255), nullable=True)  # أي أوراق إضافية
+
+    notes = Column(String(1000))  
 
     child = relationship("Child", back_populates="individual_sessions")
 
