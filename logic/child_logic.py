@@ -26,30 +26,7 @@ class ChildService:
             child.is_deleted = False
 
         db.add(child)
-
-        # Create related model based on child_type
-        if child_data.child_type == ChildTypeEnum.FULL_DAY:
-            if child_data.monthly_fee is not None or child_data.bus_fee is not None:
-                full_day_program = FullDayProgram(
-                    child_id=child_data.id,
-                    entry_date=datetime.date.today(),
-                    monthly_fee=child_data.monthly_fee,
-                    bus_fee=child_data.bus_fee,
-                )
-                db.add(full_day_program)
-        elif child_data.child_type == ChildTypeEnum.SESSIONS:
-            if (
-                child_data.session_fee is not None
-                or child_data.monthly_sessions_count is not None
-            ):
-                individual_session = IndividualSession(
-                    child_id=child_data.id,
-                    entry_date=datetime.date.today(),
-                    session_fee=child_data.session_fee,
-                    monthly_sessions_count=child_data.monthly_sessions_count,
-                )
-                db.add(individual_session)
-
+        db.flush()  # to get child.id for relationships
         try:
             db.commit()
         except SQLAlchemyIntegrityError:

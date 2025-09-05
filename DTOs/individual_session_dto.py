@@ -15,6 +15,14 @@ class IndividualSessionDTO(BaseModel):
     monthly_report: Optional[str]
     notes: Optional[str]
 
+    personal_photo: Optional[str]
+    birth_certificate: Optional[str]
+    father_id_card: Optional[str]
+    child_documents_file: Optional[str]
+
+    tests_applied_file: Optional[str]
+    monthly_report_file: Optional[str]
+
     class Config:
         orm_mode = True
         from_attributes = True
@@ -30,3 +38,14 @@ class CreateIndividualSessionDTO(BaseModel):
     specialist_name: Optional[str]
     monthly_report: Optional[str]
     notes: Optional[str]
+
+    personal_photo: Optional[str]
+    birth_certificate: Optional[str]
+    father_id_card: Optional[str]
+    child_documents_file: Optional[str]
+
+    tests_applied_file: Optional[str]
+    monthly_report_file: Optional[str]
+
+
+    

@@ -37,3 +37,4 @@ class CreateChildDTO(BaseModel):
     created_at: datetime | None = None
     child_type: ChildTypeEnum = ChildTypeEnum.FULL_DAY
     has_left: Optional[bool] = False
+
