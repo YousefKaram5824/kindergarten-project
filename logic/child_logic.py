@@ -55,7 +55,7 @@ class ChildService:
             return None
 
         # Check if new id is available (if changed)
-        if child_data.id != child_id:
+        if child_data.id is not None and child_data.id != child_id:
             if child_data.id <= 100:
                 raise ValueError("الرقم التعريفي يجب أن يكون أكبر من 100")
             if not ChildService.is_id_available(

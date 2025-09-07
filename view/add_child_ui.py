@@ -1,4 +1,6 @@
 import datetime
+import os
+import shutil
 import flet as ft
 
 # Local imports
@@ -194,8 +196,15 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         "اختر وقت التسجيل", on_click=open_created_at_time_picker
     )
 
+    def pick_photo(e):
+        file_picker.pick_files(
+            allow_multiple=False,
+            allowed_extensions=["jpg", "jpeg", "png", "gif"],
+            dialog_title="اختر صورة الطالب",
+        )
+
     photo_upload_btn = ft.ElevatedButton(
-        "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=lambda e: None
+        "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
     # Add child Dialog - Matching auth dialog style
@@ -280,9 +289,35 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
     )
     page.overlay.append(created_at_time_picker)
 
+    def handle_file_picker_result(e: ft.FilePickerResultEvent):
+        nonlocal photo_path
+        if e.files:
+            # Create child_photos directory if it doesn't exist
+            photos_dir = "child_photos"
+            if not os.path.exists(photos_dir):
+                os.makedirs(photos_dir)
 
+            # Copy the file to child_photos directory
+            uploaded_file = e.files[0]
+            file_extension = os.path.splitext(uploaded_file.name)[1]
+            new_filename = (
+                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            )
+            photo_path = os.path.join(photos_dir, new_filename)
 
+            # Copy the file
+            shutil.copy2(uploaded_file.path, photo_path)
 
+            # Update UI
+            photo_preview.src = photo_path
+            photo_preview.visible = True
+            photo_status.value = f"تم اختيار: {uploaded_file.name}"
+            photo_status.color = ft.Colors.GREEN
+            page.update()
+
+    # Photo upload functionality
+    file_picker = ft.FilePicker(on_result=handle_file_picker_result)
+    page.overlay.append(file_picker)
 
     def add_child():
         # Validate required fields
@@ -347,7 +382,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             problems=str(problem.value) if problem.value else None,
             child_image=photo_path,
             created_at=created_at_value,
-            child_type=ChildTypeEnum.FULL_DAY,
+            child_type=ChildTypeEnum.NONE,
         )
 
         # Add child to database with photo path using ChildService

@@ -8,6 +8,7 @@ from enum import Enum
 class ChildTypeEnum(enum.Enum):
     FULL_DAY = "اليوم الكامل"
     SESSIONS = "جلسات"
+    NONE = "غير مصنف"
 
 Base = declarative_base()
 
@@ -42,7 +43,7 @@ class Child(Base):
     child_image = Column(String(255))  # path to the child's image
     created_at = Column(DateTime, default=datetime.datetime.now)
     updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-    child_type = Column(SQLAEnum(ChildTypeEnum), default=ChildTypeEnum.FULL_DAY)
+    child_type = Column(SQLAEnum(ChildTypeEnum), default=ChildTypeEnum.NONE)
     is_deleted = Column(Boolean, default=False)
     has_left = Column(Boolean, default=False)
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date, datetime
 from typing import Optional
 from models import ChildTypeEnum
@@ -35,11 +35,12 @@ class CreateChildDTO(BaseModel):
     problems: str | None = None
     child_image: str | None = None
     created_at: datetime | None = None
-    child_type: ChildTypeEnum = ChildTypeEnum.FULL_DAY
+    child_type: ChildTypeEnum = ChildTypeEnum.NONE
     has_left: Optional[bool] = False
 
 
 class UpdateChildDTO(BaseModel):
+    id: Optional[int] = Field(default=None)
     name: Optional[str] = None
     birth_date: Optional[date] = None
     age: Optional[int] = None

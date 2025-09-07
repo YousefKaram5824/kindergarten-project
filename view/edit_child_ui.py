@@ -4,7 +4,7 @@ import shutil
 import flet as ft
 
 from database import db_session
-from DTOs.child_dto import CreateChildDTO
+from DTOs.child_dto import UpdateChildDTO
 from models import ChildTypeEnum
 from logic.child_logic import ChildService
 
@@ -88,30 +88,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         text_align=ft.TextAlign.RIGHT,
     )
 
-    # Edit child type dropdown
-    edit_selected_child_type = ChildTypeEnum.FULL_DAY
-    edit_child_type_dropdown = ft.Dropdown(
-        label="نوع الطالب",
-        width=300,
-        text_align=ft.TextAlign.RIGHT,
-        value=ChildTypeEnum.FULL_DAY.name,
-        options=[
-            ft.dropdown.Option(
-                key=ChildTypeEnum.FULL_DAY.name, text=ChildTypeEnum.FULL_DAY.value
-            ),
-            ft.dropdown.Option(
-                key=ChildTypeEnum.SESSIONS.name, text=ChildTypeEnum.SESSIONS.value
-            ),
-        ],
-        on_change=lambda e: update_edit_selected_child_type(e),
-    )
 
-    def update_edit_selected_child_type(e):
-        nonlocal edit_selected_child_type
-        if e.control.value == ChildTypeEnum.FULL_DAY.name:
-            edit_selected_child_type = ChildTypeEnum.FULL_DAY
-        elif e.control.value == ChildTypeEnum.SESSIONS.name:
-            edit_selected_child_type = ChildTypeEnum.SESSIONS
 
     def edit_increment_age(e):
         nonlocal edit_age_counter
@@ -203,7 +180,6 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_phone,
                 edit_dad_job,
                 edit_mum_job,
-                edit_child_type_dropdown,
                 edit_problem,
                 edit_additional_notes,
                 ft.Container(
@@ -297,7 +273,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             return
 
         # Create child DTO with updated data
-        child_data = CreateChildDTO(
+        child_data = UpdateChildDTO(
             id=int(edit_child_id.value),
             name=str(edit_child_name.value),
             age=int(edit_child_age.value),
@@ -314,8 +290,6 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             ),
             problems=str(edit_problem.value) if edit_problem.value else None,
             child_image=edit_photo_path,
-            created_at=datetime.datetime.now(),  # Keep original created_at or update?
-            child_type=edit_selected_child_type,
         )
 
         # Update child in database using ChildService
@@ -400,9 +374,6 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                     edit_photo_preview.visible = False
                     edit_photo_status.value = "لم يتم اختيار صورة"
                     edit_photo_status.color = ft.Colors.GREY
-                nonlocal edit_selected_child_type
-                edit_selected_child_type = child.child_type or ChildTypeEnum.FULL_DAY
-                edit_child_type_dropdown.value = edit_selected_child_type.name
 
                 page.open(edit_child_dialog)
 
