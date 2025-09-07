@@ -3,7 +3,7 @@ import flet as ft
 
 # Local imports
 from database import get_db, db_session
-from DTOs.daily_visit_dto import CreateDailyVisitDTO
+from DTOs.daily_visit_dto import CreateDailyVisitDTO, UpdateDailyVisitDTO
 from logic.daily_visit_logic import DailyVisitService
 from logic.child_logic import ChildService
 
@@ -73,10 +73,13 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                 if search_query:
                     search_lower = search_query.lower()
                     if not (
-                        search_lower in child_name.lower() or
-                        (visit.appointment and search_lower in visit.appointment.lower()) or
-                        (visit.purpose and search_lower in visit.purpose.lower()) or
-                        (visit.notes and search_lower in visit.notes.lower())
+                        search_lower in child_name.lower()
+                        or (
+                            visit.appointment
+                            and search_lower in visit.appointment.lower()
+                        )
+                        or (visit.purpose and search_lower in visit.purpose.lower())
+                        or (visit.notes and search_lower in visit.notes.lower())
                     ):
                         continue
 
@@ -88,9 +91,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                             icon=ft.Icons.EDIT,
                             icon_color=ft.Colors.ORANGE,
                             tooltip="تعديل",
-                            on_click=lambda e, visit_id=visit.id: edit_visit(
-                                visit_id
-                            ),
+                            on_click=lambda e, visit_id=visit.id: edit_visit(visit_id),
                         ),
                         # Delete icon
                         ft.IconButton(
@@ -110,10 +111,18 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                         cells=[
                             ft.DataCell(ft.Text(child_name)),
                             ft.DataCell(ft.Text(visit.appointment or "-")),
-                            ft.DataCell(ft.Text(visit.date.strftime("%Y-%m-%d") if visit.date else "-")),
+                            ft.DataCell(
+                                ft.Text(
+                                    visit.date.strftime("%Y-%m-%d")
+                                    if visit.date
+                                    else "-"
+                                )
+                            ),
                             ft.DataCell(ft.Text(visit.purpose or "-")),
                             ft.DataCell(ft.Text(visit.notes or "-")),
-                            ft.DataCell(ft.Text(str(visit.value) if visit.value else "-")),
+                            ft.DataCell(
+                                ft.Text(str(visit.value) if visit.value else "-")
+                            ),
                             ft.DataCell(action_icons),
                         ]
                     )
@@ -203,7 +212,9 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
         label="اسم الطفل",
         width=300,
         text_align=ft.TextAlign.RIGHT,
-        options=[],  # Will be populated
+        options=[],
+        enable_filter=True,
+        editable=True,
     )
 
     appointment = ft.TextField(
@@ -270,7 +281,6 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             allow=True, regex_string=r"[0-9.]*", replacement_string=""
         ),
         suffix=egp_text,
-        
     )
 
     def handle_date_picker(e):
@@ -448,7 +458,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             return
 
         # Create visit DTO with updated data
-        visit_data = CreateDailyVisitDTO(
+        visit_data = UpdateDailyVisitDTO(
             child_id=int(edit_child_dropdown.value),
             appointment=edit_appointment.value if edit_appointment.value else None,
             date=datetime.datetime.strptime(edit_date.value, "%Y-%m-%d").date(),
@@ -571,7 +581,9 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
         [
             ft.Row(
                 [
-                    ft.Text("إدارة الزيارات اليومية", size=24, weight=ft.FontWeight.BOLD),
+                    ft.Text(
+                        "إدارة الزيارات اليومية", size=24, weight=ft.FontWeight.BOLD
+                    ),
                     add_visit_btn,
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
