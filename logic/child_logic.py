@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import Child, ChildTypeEnum, FullDayProgram, IndividualSession
-from DTOs.child_dto import ChildDTO, CreateChildDTO
+from DTOs.child_dto import ChildDTO, CreateChildDTO, UpdateChildDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 import datetime
@@ -44,7 +44,7 @@ class ChildService:
 
     @staticmethod
     def update_child(
-        db: Session, child_id: int, child_data: CreateChildDTO
+        db: Session, child_id: int, child_data: UpdateChildDTO
     ) -> ChildDTO | None:
         child = (
             db.query(Child)

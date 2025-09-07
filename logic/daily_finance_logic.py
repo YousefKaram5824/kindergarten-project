@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import DailyFinance
-from DTOs.daily_finance_dto import DailyFinanceDTO, CreateDailyFinanceDTO
+from DTOs.daily_finance_dto import DailyFinanceDTO, CreateDailyFinanceDTO, UpdateDailyFinanceDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
@@ -27,7 +27,7 @@ class DailyFinanceService:
 
     @staticmethod
     def update_finance(
-        db: Session, finance_id: int, finance_data: CreateDailyFinanceDTO
+        db: Session, finance_id: int, finance_data: UpdateDailyFinanceDTO
     ) -> DailyFinanceDTO | None:
         finance = db.query(DailyFinance).filter(DailyFinance.id == finance_id).first()
         if not finance:

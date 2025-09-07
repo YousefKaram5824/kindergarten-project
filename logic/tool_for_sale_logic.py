@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import ToolForSale
-from DTOs.tool_for_sale_dto import ToolForSaleDTO, CreateToolForSaleDTO
+from DTOs.tool_for_sale_dto import ToolForSaleDTO, CreateToolForSaleDTO, UpdateToolForSaleDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
@@ -25,7 +25,7 @@ class ToolForSaleService:
 
     @staticmethod
     def update_tool(
-        db: Session, tool_id: int, tool_data: CreateToolForSaleDTO
+        db: Session, tool_id: int, tool_data: UpdateToolForSaleDTO
     ) -> ToolForSaleDTO | None:
         tool = db.query(ToolForSale).filter(ToolForSale.id == tool_id).first()
         if not tool:

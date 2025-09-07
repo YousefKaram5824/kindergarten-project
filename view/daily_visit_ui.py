@@ -67,7 +67,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                 visit_data_table.rows.clear()
 
             for visit in visits_dto:
-                child_name = child_dict.get(visit.id, "غير معروف")
+                child_name = child_dict.get(visit.child_id, "غير معروف")
 
                 # Filter by search query if provided
                 if search_query:
@@ -130,7 +130,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             if visit:
                 current_edit_visit_id = visit_id
                 # Populate edit form with visit data
-                edit_child_dropdown.value = str(visit.id)
+                edit_child_dropdown.value = str(visit.child_id)
                 edit_appointment.value = visit.appointment or ""
                 edit_date.value = visit.date.strftime("%Y-%m-%d") if visit.date else ""
                 edit_selected_date = visit.date if visit.date else None
@@ -147,7 +147,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             visit = DailyVisitService.get_visit(db, visit_id)
             if visit:
                 # Get child name for confirmation
-                child = ChildService.get_child_by_id(db, visit.id)
+                child = ChildService.get_child_by_id(db, visit.child_id)
                 child_name = child.name if child else "غير معروف"
 
                 # Show confirmation dialog

@@ -1,10 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
 
 class DailyVisitDTO(BaseModel):
     id: int
+    child_id: int
     value: Optional[float]
     appointment: Optional[str]
     date: Optional[date]
@@ -23,3 +24,14 @@ class CreateDailyVisitDTO(BaseModel):
     date: Optional[date]
     purpose: Optional[str]
     notes: Optional[str]
+
+
+class UpdateDailyVisitDTO(BaseModel):
+    child_id: Optional[int] = None
+    value: Optional[float] = None
+    appointment: Optional[str] = None
+    date: Optional[date] = None # pyright: ignore[reportInvalidTypeForm]
+    purpose: Optional[str] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)

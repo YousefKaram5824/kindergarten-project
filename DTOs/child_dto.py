@@ -38,3 +38,19 @@ class CreateChildDTO(BaseModel):
     child_type: ChildTypeEnum = ChildTypeEnum.FULL_DAY
     has_left: Optional[bool] = False
 
+
+class UpdateChildDTO(BaseModel):
+    name: Optional[str] = None
+    birth_date: Optional[date] = None
+    age: Optional[int] = None
+    phone_number: Optional[str] = None
+    father_job: Optional[str] = None
+    mother_job: Optional[str] = None
+    notes: Optional[str] = None
+    problems: Optional[str] = None
+    child_image: Optional[str] = None
+    child_type: Optional[ChildTypeEnum] = None
+    has_left: Optional[bool] = None
+
+    model_config = ConfigDict(from_attributes=True)
+

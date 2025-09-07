@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from DTOs.daily_finance_dto import UpdateDailyVisitDTO
 from models import DailyVisit
 from DTOs.daily_visit_dto import DailyVisitDTO, CreateDailyVisitDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
@@ -25,7 +26,7 @@ class DailyVisitService:
 
     @staticmethod
     def update_visit(
-        db: Session, visit_id: int, visit_data: CreateDailyVisitDTO
+        db: Session, visit_id: int, visit_data: UpdateDailyVisitDTO
     ) -> DailyVisitDTO | None:
         visit = db.query(DailyVisit).filter(DailyVisit.id == visit_id).first()
         if not visit:

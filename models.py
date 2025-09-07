@@ -72,21 +72,17 @@ class FullDayProgram(Base):
     id = Column(Integer, primary_key=True)
     child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
 
-    entry_date = Column(Date, nullable=False)                         # تاريخ الدخول
     diagnosis = Column(String(500))                                   # التشخيص
 
     monthly_fee = Column(Float)                                       # قيمة الاشتراك الشهري
     bus_fee = Column(Float)                                           # قيمة اشتراك الباص
 
-    personal_photo = Column(String(255), nullable=True)               # صورة شخصية (مسار/رابط)
     birth_certificate = Column(String(255), nullable=True)            # شهادة الميلاد
     father_id_card = Column(String(255), nullable=True)               # بطاقة الأب
-    test_documents = Column(String(255), nullable=True)               # ملفات أو صور للاختبارات
 
     tests_applied_file = Column(String(255), nullable=True)           # ملف الاختبارات المطبقة
     training_plan_file = Column(String(255), nullable=True)           # ملف الخطة التدريبية
     monthly_report_file = Column(String(255), nullable=True)          # ملف التقرير الشهري
-    child_documents_file = Column(String(255), nullable=True)         # ملف الأوراق الخاصة بالطفل (لو مجمعينها في ملف واحد)
 
     notes = Column(String(1000))                                      # ملاحظات إضافية
     attendance_status = Column(String(50))                            # Regular / Irregular
@@ -103,7 +99,6 @@ class IndividualSession(Base):
     id = Column(Integer, primary_key=True)
     child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
 
-    entry_date = Column(Date, nullable=False)
     diagnosis = Column(String(500))  # التشخيص
     tests_applied_file = Column(String(255))  # ملفات الاختبارات المطبقة
     session_fee = Column(Float)
@@ -113,10 +108,8 @@ class IndividualSession(Base):
     monthly_report_file = Column(String(255))  # ملفات التقرير الشهري
 
     
-    personal_photo = Column(String(255), nullable=True)        # صورة شخصية
     birth_certificate = Column(String(255), nullable=True)     # شهادة الميلاد
     father_id_card = Column(String(255), nullable=True)        # بطاقة الأب
-    child_documents_file = Column(String(255), nullable=True)  # أي أوراق إضافية
 
     notes = Column(String(1000))  
 

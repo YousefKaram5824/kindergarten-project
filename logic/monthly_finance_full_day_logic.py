@@ -3,6 +3,7 @@ from models import MonthlyFinanceFullDay
 from DTOs.monthly_finance_full_day_dto import (
     MonthlyFinanceFullDayDTO,
     CreateMonthlyFinanceFullDayDTO,
+    UpdateMonthlyFinanceFullDayDTO,
 )
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
@@ -34,7 +35,7 @@ class MonthlyFinanceFullDayService:
 
     @staticmethod
     def update_monthly(
-        db: Session, month_id: int, data: CreateMonthlyFinanceFullDayDTO
+        db: Session, month_id: int, data: UpdateMonthlyFinanceFullDayDTO
     ) -> MonthlyFinanceFullDayDTO | None:
         month = (
             db.query(MonthlyFinanceFullDay)

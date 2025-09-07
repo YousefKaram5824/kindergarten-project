@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models import IndividualSession
-from DTOs.individual_session_dto import IndividualSessionDTO, CreateIndividualSessionDTO
+from DTOs.individual_session_dto import IndividualSessionDTO, CreateIndividualSessionDTO, UpdateIndividualSessionDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
@@ -31,7 +31,7 @@ class IndividualSessionService:
 
     @staticmethod
     def update_session(
-        db: Session, session_id: int, session_data: CreateIndividualSessionDTO
+        db: Session, session_id: int, session_data: UpdateIndividualSessionDTO
     ) -> IndividualSessionDTO | None:
         session_obj = (
             db.query(IndividualSession)

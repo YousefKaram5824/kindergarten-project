@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 
@@ -29,3 +29,16 @@ class CreateMonthlyFinanceIndividualDTO(BaseModel):
     external_remaining: Optional[float]
     remaining: Optional[float]
     notes: Optional[str]
+
+class UpdateMonthlyFinanceIndividualDTO(BaseModel):
+    month: Optional[str] = None
+    total_income: Optional[float] = None
+    specialists_total: Optional[float] = None
+    center_total: Optional[float] = None
+    loans: Optional[float] = None
+    specialists_details: Optional[str] = None
+    external_remaining: Optional[float] = None
+    remaining: Optional[float] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)

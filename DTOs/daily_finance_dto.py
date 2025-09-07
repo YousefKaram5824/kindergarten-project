@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 
@@ -24,3 +24,14 @@ class CreateDailyFinanceDTO(BaseModel):
     service: Optional[str]
     payment_date: Optional[date]
     notes: Optional[str]
+
+
+class UpdateDailyFinanceDTO(BaseModel):
+    value: Optional[float] = None
+    remaining: Optional[float] = None
+    count: Optional[int] = None
+    service: Optional[str] = None
+    payment_date: Optional[date] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
