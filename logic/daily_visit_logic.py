@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from DTOs.daily_finance_dto import UpdateDailyVisitDTO
+from DTOs.daily_visit_dto import UpdateDailyVisitDTO
 from models import DailyVisit
 from DTOs.daily_visit_dto import DailyVisitDTO, CreateDailyVisitDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
