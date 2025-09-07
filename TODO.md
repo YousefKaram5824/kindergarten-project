@@ -1,14 +1,10 @@
-# TODO: Integrate FullDayProgramDTO and IndividualSessionDTO in add_child_ui
+# TODO: Simplify Add Child UI
 
-## Tasks
-- [x] Import CreateFullDayProgramDTO, CreateIndividualSessionDTO, FullDayProgramService, IndividualSessionService in add_child_ui.py
-- [x] Modify add_child function to create program/session DTO after creating child
-- [x] For FULL_DAY child_type: create CreateFullDayProgramDTO with monthly_fee, bus_fee, entry_date, child_id
-- [x] For SESSIONS child_type: create CreateIndividualSessionDTO with session_fee, monthly_sessions_count, entry_date, child_id
-- [x] Call appropriate service to create the program/session record
-- [x] Add all required fields to DTOs (diagnosis, tests_applied, etc.)
-- [x] Add UI fields for additional program/session data (diagnosis, tests_applied, training_plan, etc.)
-- [x] Update add_child function to collect UI values for additional fields
-- [x] Update on_checkbox_change to show/hide additional fields based on child type
-- [x] Update reset_form to reset all new fields
-- [ ] Test adding children of both types to verify data is stored correctly
+- [ ] Remove child type checkboxes (full_day_checkbox, sessions_checkbox) and related UI elements
+- [ ] Remove all conditional fields (monthly_fee, bus_fee, session_fee, monthly_sessions_count, diagnosis, tests_applied, training_plan, monthly_report, attendance_status, attended_sessions_count, specialist_name)
+- [ ] Remove all file upload buttons and related variables (personal_photo_btn, birth_certificate_btn, etc.)
+- [ ] Remove on_checkbox_change function and selected_child_type variable
+- [ ] Simplify add_child function to only create child without dependent data
+- [ ] Update reset_form to only reset remaining fields
+- [ ] Adjust dialog content to only include essential fields
+- [ ] Test the simplified UI
