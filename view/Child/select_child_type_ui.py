@@ -14,7 +14,9 @@ from logic.full_day_program_logic import FullDayProgramService
 from logic.individual_session_logic import IndividualSessionService
 
 
-def open_type_selection_dialog(page: ft.Page, child_id: int, update_callback=None):
+def open_type_selection_dialog(
+    page: ft.Page, child_id: int, update_callback=None, is_edit=False
+):
     """Open the type selection dialog for a child"""
 
     # Fields for both types
@@ -282,6 +284,96 @@ def open_type_selection_dialog(page: ft.Page, child_id: int, update_callback=Non
         on_change=lambda e: update_field_visibility(e.control.value),
     )
 
+    # Pre-fill fields if editing
+    if is_edit:
+        with db_session() as db:
+            child = ChildService.get_child_by_id(db, child_id)
+            if child:
+                type_dropdown.value = (
+                    child.child_type.name
+                    if child.child_type != ChildTypeEnum.NONE
+                    else None
+                )
+                if child.child_type == ChildTypeEnum.FULL_DAY:
+                    program = FullDayProgramService.get_program_by_child_id(
+                        db, child_id
+                    )
+                    if program:
+                        diagnosis_field.value = program.diagnosis or ""
+                        monthly_fee_field.value = (
+                            str(program.monthly_fee) if program.monthly_fee else ""
+                        )
+                        bus_fee_field.value = (
+                            str(program.bus_fee) if program.bus_fee else ""
+                        )
+                        attendance_status_field.value = program.attendance_status or ""
+                        notes_field.value = program.notes or ""
+                        birth_certificate_path = program.birth_certificate
+                        father_id_card_path = program.father_id_card
+                        tests_applied_file_path = program.tests_applied_file
+                        training_plan_file_path = program.training_plan_file
+                        monthly_report_file_path = program.monthly_report_file
+                        # Update file statuses
+                        if program.birth_certificate:
+                            birth_certificate_status.value = f"تم اختيار: {os.path.basename(program.birth_certificate)}"
+                            birth_certificate_status.color = ft.Colors.GREEN
+                        if program.father_id_card:
+                            father_id_card_status.value = (
+                                f"تم اختيار: {os.path.basename(program.father_id_card)}"
+                            )
+                            father_id_card_status.color = ft.Colors.GREEN
+                        if program.tests_applied_file:
+                            tests_applied_status.value = f"تم اختيار: {os.path.basename(program.tests_applied_file)}"
+                            tests_applied_status.color = ft.Colors.GREEN
+                        if program.training_plan_file:
+                            training_plan_status.value = f"تم اختيار: {os.path.basename(program.training_plan_file)}"
+                            training_plan_status.color = ft.Colors.GREEN
+                        if program.monthly_report_file:
+                            monthly_report_status.value = f"تم اختيار: {os.path.basename(program.monthly_report_file)}"
+                            monthly_report_status.color = ft.Colors.GREEN
+                        update_field_visibility(ChildTypeEnum.FULL_DAY.name)
+                elif child.child_type == ChildTypeEnum.SESSIONS:
+                    session = IndividualSessionService.get_session_by_child_id(
+                        db, child_id
+                    )
+                    if session:
+                        diagnosis_field.value = session.diagnosis or ""
+                        session_fee_field.value = (
+                            str(session.session_fee) if session.session_fee else ""
+                        )
+                        monthly_sessions_count_field.value = (
+                            str(session.monthly_sessions_count)
+                            if session.monthly_sessions_count
+                            else ""
+                        )
+                        attended_sessions_count_field.value = (
+                            str(session.attended_sessions_count)
+                            if session.attended_sessions_count
+                            else ""
+                        )
+                        specialist_name_field.value = session.specialist_name or ""
+                        notes_field.value = session.notes or ""
+                        birth_certificate_path = session.birth_certificate
+                        father_id_card_path = session.father_id_card
+                        tests_applied_file_path = session.tests_applied_file
+                        monthly_report_file_path = session.monthly_report_file
+                        # Update file statuses
+                        if session.birth_certificate:
+                            birth_certificate_status.value = f"تم اختيار: {os.path.basename(session.birth_certificate)}"
+                            birth_certificate_status.color = ft.Colors.GREEN
+                        if session.father_id_card:
+                            father_id_card_status.value = (
+                                f"تم اختيار: {os.path.basename(session.father_id_card)}"
+                            )
+                            father_id_card_status.color = ft.Colors.GREEN
+                        if session.tests_applied_file:
+                            tests_applied_status.value = f"تم اختيار: {os.path.basename(session.tests_applied_file)}"
+                            tests_applied_status.color = ft.Colors.GREEN
+                        if session.monthly_report_file:
+                            monthly_report_status.value = f"تم اختيار: {os.path.basename(session.monthly_report_file)}"
+                            monthly_report_status.color = ft.Colors.GREEN
+                        update_field_visibility(ChildTypeEnum.SESSIONS.name)
+
     def save_type(e):
         selected_type = type_dropdown.value
         if selected_type:
@@ -289,63 +381,200 @@ def open_type_selection_dialog(page: ft.Page, child_id: int, update_callback=Non
                 update_dto = UpdateChildDTO(child_type=ChildTypeEnum[selected_type])
                 success = ChildService.update_child(db, child_id, update_dto)
                 if success:
-                    # Create the program/session
-                    if selected_type == ChildTypeEnum.FULL_DAY.name:
-                        program_data = CreateFullDayProgramDTO(
-                            diagnosis=diagnosis_field.value or None,
-                            monthly_fee=(
-                                float(monthly_fee_field.value)
-                                if monthly_fee_field.value
-                                else None
-                            ),
-                            bus_fee=(
-                                float(bus_fee_field.value)
-                                if bus_fee_field.value
-                                else None
-                            ),
-                            attendance_status=attendance_status_field.value or None,
-                            notes=notes_field.value or None,
-                            birth_certificate=birth_certificate_path,
-                            father_id_card=father_id_card_path,
-                            tests_applied_file=tests_applied_file_path,
-                            training_plan_file=training_plan_file_path,
-                            monthly_report_file=monthly_report_file_path,
-                        )
-                        FullDayProgramService.create_program(db, program_data, child_id)
-                    elif selected_type == ChildTypeEnum.SESSIONS.name:
-                        session_data = CreateIndividualSessionDTO(
-                            diagnosis=diagnosis_field.value or None,
-                            session_fee=(
-                                float(session_fee_field.value)
-                                if session_fee_field.value
-                                else None
-                            ),
-                            monthly_sessions_count=(
-                                int(monthly_sessions_count_field.value)
-                                if monthly_sessions_count_field.value
-                                else None
-                            ),
-                            attended_sessions_count=(
-                                int(attended_sessions_count_field.value)
-                                if attended_sessions_count_field.value
-                                else None
-                            ),
-                            specialist_name=specialist_name_field.value or None,
-                            notes=notes_field.value or None,
-                            birth_certificate=birth_certificate_path,
-                            father_id_card=father_id_card_path,
-                            tests_applied_file=tests_applied_file_path,
-                            monthly_report_file=monthly_report_file_path,
-                        )
-                        IndividualSessionService.create_session(
-                            db, session_data, child_id
-                        )
+                    if is_edit:
+                        # Update existing program/session
+                        if selected_type == ChildTypeEnum.FULL_DAY.name:
+                            existing_program = (
+                                FullDayProgramService.get_program_by_child_id(
+                                    db, child_id
+                                )
+                            )
+                            if existing_program:
+                                from DTOs.full_day_program_dto import (
+                                    UpdateFullDayProgramDTO,
+                                )
+
+                                program_data = UpdateFullDayProgramDTO(
+                                    diagnosis=diagnosis_field.value or None,
+                                    monthly_fee=(
+                                        float(monthly_fee_field.value)
+                                        if monthly_fee_field.value
+                                        else None
+                                    ),
+                                    bus_fee=(
+                                        float(bus_fee_field.value)
+                                        if bus_fee_field.value
+                                        else None
+                                    ),
+                                    attendance_status=attendance_status_field.value
+                                    or None,
+                                    notes=notes_field.value or None,
+                                    birth_certificate=birth_certificate_path,
+                                    father_id_card=father_id_card_path,
+                                    tests_applied_file=tests_applied_file_path,
+                                    training_plan_file=training_plan_file_path,
+                                    monthly_report_file=monthly_report_file_path,
+                                )
+                                FullDayProgramService.update_program(
+                                    db, existing_program.id, program_data
+                                )
+                            else:
+                                # If no existing, create
+                                program_data = CreateFullDayProgramDTO(
+                                    diagnosis=diagnosis_field.value or None,
+                                    monthly_fee=(
+                                        float(monthly_fee_field.value)
+                                        if monthly_fee_field.value
+                                        else None
+                                    ),
+                                    bus_fee=(
+                                        float(bus_fee_field.value)
+                                        if bus_fee_field.value
+                                        else None
+                                    ),
+                                    attendance_status=attendance_status_field.value
+                                    or None,
+                                    notes=notes_field.value or None,
+                                    birth_certificate=birth_certificate_path,
+                                    father_id_card=father_id_card_path,
+                                    tests_applied_file=tests_applied_file_path,
+                                    training_plan_file=training_plan_file_path,
+                                    monthly_report_file=monthly_report_file_path,
+                                )
+                                FullDayProgramService.create_program(
+                                    db, program_data, child_id
+                                )
+                        elif selected_type == ChildTypeEnum.SESSIONS.name:
+                            existing_session = (
+                                IndividualSessionService.get_session_by_child_id(
+                                    db, child_id
+                                )
+                            )
+                            if existing_session:
+                                from DTOs.individual_session_dto import (
+                                    UpdateIndividualSessionDTO,
+                                )
+
+                                session_data = UpdateIndividualSessionDTO(
+                                    diagnosis=diagnosis_field.value or None,
+                                    session_fee=(
+                                        float(session_fee_field.value)
+                                        if session_fee_field.value
+                                        else None
+                                    ),
+                                    monthly_sessions_count=(
+                                        int(monthly_sessions_count_field.value)
+                                        if monthly_sessions_count_field.value
+                                        else None
+                                    ),
+                                    attended_sessions_count=(
+                                        int(attended_sessions_count_field.value)
+                                        if attended_sessions_count_field.value
+                                        else None
+                                    ),
+                                    specialist_name=specialist_name_field.value or None,
+                                    notes=notes_field.value or None,
+                                    birth_certificate=birth_certificate_path,
+                                    father_id_card=father_id_card_path,
+                                    tests_applied_file=tests_applied_file_path,
+                                    monthly_report_file=monthly_report_file_path,
+                                )
+                                IndividualSessionService.update_session(
+                                    db, existing_session.id, session_data
+                                )
+                            else:
+                                # If no existing, create
+                                session_data = CreateIndividualSessionDTO(
+                                    diagnosis=diagnosis_field.value or None,
+                                    session_fee=(
+                                        float(session_fee_field.value)
+                                        if session_fee_field.value
+                                        else None
+                                    ),
+                                    monthly_sessions_count=(
+                                        int(monthly_sessions_count_field.value)
+                                        if monthly_sessions_count_field.value
+                                        else None
+                                    ),
+                                    attended_sessions_count=(
+                                        int(attended_sessions_count_field.value)
+                                        if attended_sessions_count_field.value
+                                        else None
+                                    ),
+                                    specialist_name=specialist_name_field.value or None,
+                                    notes=notes_field.value or None,
+                                    birth_certificate=birth_certificate_path,
+                                    father_id_card=father_id_card_path,
+                                    tests_applied_file=tests_applied_file_path,
+                                    monthly_report_file=monthly_report_file_path,
+                                )
+                                IndividualSessionService.create_session(
+                                    db, session_data, child_id
+                                )
+                    else:
+                        # Create new program/session
+                        if selected_type == ChildTypeEnum.FULL_DAY.name:
+                            program_data = CreateFullDayProgramDTO(
+                                diagnosis=diagnosis_field.value or None,
+                                monthly_fee=(
+                                    float(monthly_fee_field.value)
+                                    if monthly_fee_field.value
+                                    else None
+                                ),
+                                bus_fee=(
+                                    float(bus_fee_field.value)
+                                    if bus_fee_field.value
+                                    else None
+                                ),
+                                attendance_status=attendance_status_field.value or None,
+                                notes=notes_field.value or None,
+                                birth_certificate=birth_certificate_path,
+                                father_id_card=father_id_card_path,
+                                tests_applied_file=tests_applied_file_path,
+                                training_plan_file=training_plan_file_path,
+                                monthly_report_file=monthly_report_file_path,
+                            )
+                            FullDayProgramService.create_program(
+                                db, program_data, child_id
+                            )
+                        elif selected_type == ChildTypeEnum.SESSIONS.name:
+                            session_data = CreateIndividualSessionDTO(
+                                diagnosis=diagnosis_field.value or None,
+                                session_fee=(
+                                    float(session_fee_field.value)
+                                    if session_fee_field.value
+                                    else None
+                                ),
+                                monthly_sessions_count=(
+                                    int(monthly_sessions_count_field.value)
+                                    if monthly_sessions_count_field.value
+                                    else None
+                                ),
+                                attended_sessions_count=(
+                                    int(attended_sessions_count_field.value)
+                                    if attended_sessions_count_field.value
+                                    else None
+                                ),
+                                specialist_name=specialist_name_field.value or None,
+                                notes=notes_field.value or None,
+                                birth_certificate=birth_certificate_path,
+                                father_id_card=father_id_card_path,
+                                tests_applied_file=tests_applied_file_path,
+                                monthly_report_file=monthly_report_file_path,
+                            )
+                            IndividualSessionService.create_session(
+                                db, session_data, child_id
+                            )
 
                     if update_callback:
                         update_callback()
 
                     snackbar = ft.SnackBar(
-                        content=ft.Text("تم تحديث نوع الطالب وإنشاء البرنامج"),
+                        content=ft.Text(
+                            "تم تحديث نوع الطالب والبيانات"
+                            if is_edit
+                            else "تم تحديث نوع الطالب وإنشاء البرنامج"
+                        ),
                         bgcolor=ft.Colors.GREEN,
                         duration=3000,
                     )

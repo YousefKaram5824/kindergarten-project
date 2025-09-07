@@ -356,7 +356,6 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_mum_job.value = child.mother_job or ""
                 edit_problem.value = child.problems or ""
                 edit_additional_notes.value = child.notes or ""
-                edit_additional_notes.value = ""
                 nonlocal edit_photo_path
                 edit_photo_path = child.child_image
                 if edit_photo_path and os.path.exists(edit_photo_path):

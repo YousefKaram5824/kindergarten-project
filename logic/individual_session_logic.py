@@ -35,6 +35,11 @@ class IndividualSessionService:
         return [map_to_dto(s, IndividualSessionDTO) for s in sessions]
 
     @staticmethod
+    def get_session_by_child_id(db: Session, child_id: int) -> IndividualSessionDTO | None:
+        session = db.query(IndividualSession).filter(IndividualSession.child_id == child_id).first()
+        return map_to_dto(session, IndividualSessionDTO) if session else None
+
+    @staticmethod
     def update_session(
         db: Session, session_id: int, session_data: UpdateIndividualSessionDTO
     ) -> IndividualSessionDTO | None:

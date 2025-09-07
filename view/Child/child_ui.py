@@ -8,6 +8,8 @@ from view.Child.child_details_ui import show_child_details_page
 from view.Child.add_child_ui import create_add_child_dialog
 from view.Child.edit_child_ui import create_edit_child_dialog
 from view.Child.select_child_type_ui import open_type_selection_dialog
+from logic.full_day_program_logic import FullDayProgramService
+from logic.individual_session_logic import IndividualSessionService
 
 
 # Color constants
@@ -182,7 +184,94 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 )
             )
         else:
-            return ft.DataCell(ft.Text(child.child_type.value))
+            return ft.DataCell(
+                ft.Row(
+                    [
+                        ft.Text(child.child_type.value),
+                        ft.IconButton(
+                            icon=ft.Icons.VISIBILITY,
+                            icon_color=ft.Colors.GREEN,
+                            tooltip="عرض البيانات حسب النوع",
+                            on_click=lambda e, cid=child.id: view_child_type_data(cid),
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.EDIT,
+                            icon_color=ft.Colors.BLUE,
+                            tooltip="تعديل النوع والبيانات",
+                            on_click=lambda e, cid=child.id: open_type_selection_dialog(
+                                page, cid, update_all_tables, is_edit=True
+                            ),
+                        ),
+                    ],
+                    spacing=5,
+                    alignment=ft.MainAxisAlignment.START,
+                )
+            )
+
+    def view_child_type_data(child_id):
+        """View child's data according to their type"""
+        with db_session() as db:
+            child = ChildService.get_child_by_id(db, child_id)
+            if not child:
+                return
+
+            content = ft.Column([], scroll=ft.ScrollMode.AUTO)
+
+            if child.child_type == ChildTypeEnum.FULL_DAY:
+                program = FullDayProgramService.get_program_by_child_id(db, child_id)
+                if program:
+                    content.controls = [
+                        ft.Text(f"الاسم: {child.name}", size=16),
+                        ft.Text(f"العمر: {child.age or '-'}", size=16),
+                        ft.Text(f"نوع الطالب: {child.child_type.value}", size=16),
+                        ft.Divider(),
+                        ft.Text(
+                            "بيانات البرنامج اليومي الكامل:", weight=ft.FontWeight.BOLD
+                        ),
+                        ft.Text(f"التشخيص: {program.diagnosis or '-'}"),
+                        ft.Text(f"قيمة الاشتراك الشهري: {program.monthly_fee or '-'}"),
+                        ft.Text(f"قيمة اشتراك الباص: {program.bus_fee or '-'}"),
+                        ft.Text(f"حالة الحضور: {program.attendance_status or '-'}"),
+                        ft.Text(f"الملاحظات: {program.notes or '-'}"),
+                    ]
+                else:
+                    content.controls = [
+                        ft.Text("لا توجد بيانات للبرنامج اليومي الكامل")
+                    ]
+            elif child.child_type == ChildTypeEnum.SESSIONS:
+                session = IndividualSessionService.get_session_by_child_id(db, child_id)
+                if session:
+                    content.controls = [
+                        ft.Text(f"الاسم: {child.name}", size=16),
+                        ft.Text(f"العمر: {child.age or '-'}", size=16),
+                        ft.Text(f"نوع الطالب: {child.child_type.value}", size=16),
+                        ft.Divider(),
+                        ft.Text("بيانات الجلسات الفردية:", weight=ft.FontWeight.BOLD),
+                        ft.Text(f"التشخيص: {session.diagnosis or '-'}"),
+                        ft.Text(f"قيمة الجلسة: {session.session_fee or '-'}"),
+                        ft.Text(
+                            f"عدد الجلسات الشهرية: {session.monthly_sessions_count or '-'}"
+                        ),
+                        ft.Text(
+                            f"عدد الجلسات المحضورة: {session.attended_sessions_count or '-'}"
+                        ),
+                        ft.Text(f"اسم المتخصص: {session.specialist_name or '-'}"),
+                        ft.Text(f"الملاحظات: {session.notes or '-'}"),
+                    ]
+                else:
+                    content.controls = [ft.Text("لا توجد بيانات للجلسات الفردية")]
+            else:
+                content.controls = [ft.Text("نوع الطالب غير محدد")]
+
+            dialog = ft.AlertDialog(
+                title=ft.Text(f"بيانات الطالب: {child.name}"),
+                content=content,
+                actions=[
+                    ft.TextButton("إغلاق", on_click=lambda e: page.close(dialog)),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+            )
+            page.open(dialog)
 
     def update_child_table():
         # Get childs from database using ChildService with search and type filter

@@ -33,6 +33,11 @@ class FullDayProgramService:
         return [map_to_dto(p, FullDayProgramDTO) for p in programs]
 
     @staticmethod
+    def get_program_by_child_id(db: Session, child_id: int) -> FullDayProgramDTO | None:
+        program = db.query(FullDayProgram).filter(FullDayProgram.child_id == child_id).first()
+        return map_to_dto(program, FullDayProgramDTO) if program else None
+
+    @staticmethod
     def update_program(
         db: Session, program_id: int, program_data: UpdateFullDayProgramDTO
     ) -> FullDayProgramDTO | None:
