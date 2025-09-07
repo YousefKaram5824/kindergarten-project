@@ -5,7 +5,7 @@ Database setup for the project using SQLAlchemy + SQLite.
 
 - Exports: engine, SessionLocal, get_db, create_tables
 - It will try to import Base from either `app.models` or `models`
-  depending on your project layout.
+depending on your project layout.
 """
 
 import os

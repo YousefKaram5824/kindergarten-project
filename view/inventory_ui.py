@@ -37,12 +37,11 @@ def create_inventory_tab(page: ft.Page):
         suffix_icon=ft.Icons.SEARCH,
     )
 
-    # Tables for each category
-    inventory_table = ft.DataTable(
+    # Unified table for all categories
+    all_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("اسم الأداة")),
-            ft.DataColumn(ft.Text("رقم الأداة")),
+            ft.DataColumn(ft.Text("النوع")),
+            ft.DataColumn(ft.Text("الاسم")),
             ft.DataColumn(ft.Text("الكمية")),
             ft.DataColumn(ft.Text("سعر الشراء")),
             ft.DataColumn(ft.Text("سعر البيع")),
@@ -61,265 +60,168 @@ def create_inventory_tab(page: ft.Page):
         column_spacing=20,
     )
 
-    books_table = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("اسم الكتاب")),
-            ft.DataColumn(ft.Text("الكمية")),
-            ft.DataColumn(ft.Text("سعر الشراء")),
-            ft.DataColumn(ft.Text("سعر البيع")),
-            ft.DataColumn(ft.Text("المتبقي")),
-            ft.DataColumn(ft.Text("ملاحظات")),
-        ],
-        rows=[],
-        border=ft.border.all(1, TABLE_BORDER_COLOR),
-        border_radius=ft.border_radius.all(BORDER_RADIUS),
-        vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
-        heading_row_height=45,
-        data_row_max_height=55,
-        column_spacing=20,
-    )
-
-    uniforms_table = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("الكمية")),
-            ft.DataColumn(ft.Text("سعر الشراء")),
-            ft.DataColumn(ft.Text("سعر البيع")),
-            ft.DataColumn(ft.Text("المتبقي")),
-            ft.DataColumn(ft.Text("ملاحظات")),
-        ],
-        rows=[],
-        border=ft.border.all(1, TABLE_BORDER_COLOR),
-        border_radius=ft.border_radius.all(BORDER_RADIUS),
-        vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
-        heading_row_height=45,
-        data_row_max_height=55,
-        column_spacing=20,
-    )
-
     # Container for the table
     table_container = ft.Container(
-        content=ft.Column([inventory_table], scroll=ft.ScrollMode.AUTO),
+        content=ft.Column([all_table], scroll=ft.ScrollMode.AUTO),
         height=500,
         padding=10,
         alignment=ft.alignment.center,
         margin=10,
     )
 
-    # Update functions for each table
-    def update_inventory_table():
+    def update_all_table(category):
         with db_session() as db:
-            if current_filter["search_query"]:
-                tools = ToolForSaleService.get_all_tools(db)
-                tools = [
-                    t
-                    for t in tools
-                    if current_filter["search_query"].lower()
-                    in (t.tool_name or "").lower()
-                    or current_filter["search_query"].lower()
-                    in (t.tool_number or "").lower()
-                    or current_filter["search_query"].lower() in (t.notes or "").lower()
-                ]
-            else:
-                tools = ToolForSaleService.get_all_tools(db)
-            if inventory_table.rows is None:
-                inventory_table.rows = []
-            else:
-                inventory_table.rows.clear()
+            all_items = []
+            # Get tools
+            tools = ToolForSaleService.get_all_tools(db)
             for tool in tools:
-                action_icons = ft.Row(
-                    [
-                        ft.IconButton(
-                            icon=ft.Icons.EDIT,
-                            icon_color=ft.Colors.ORANGE,
-                            tooltip="تعديل",
-                            on_click=lambda e, tool_id=tool.id: open_edit_dialog(
-                                tool_id
-                            ),
-                        ),
-                        ft.IconButton(
-                            icon=ft.Icons.DELETE,
-                            icon_color=DELETE_BUTTON_COLOR,
-                            tooltip="حذف",
-                            on_click=lambda e, tool_id=tool.id: confirm_delete_tool(
-                                tool_id
-                            ),
-                        ),
-                    ],
-                    spacing=5,
+                if current_filter["search_query"]:
+                    if not (
+                        current_filter["search_query"].lower()
+                        in (tool.tool_name or "").lower()
+                        or current_filter["search_query"].lower()
+                        in (tool.tool_number or "").lower()
+                        or current_filter["search_query"].lower()
+                        in (tool.notes or "").lower()
+                    ):
+                        continue
+                all_items.append(
+                    {
+                        "type": "أداة",
+                        "id": tool.id,
+                        "name": tool.tool_name or "",
+                        "quantity": tool.quantity,
+                        "buy_price": tool.buy_price,
+                        "sell_price": tool.sell_price,
+                        "remaining": tool.remaining,
+                        "notes": tool.notes or "",
+                    }
                 )
-                inventory_table.rows.append(
-                    ft.DataRow(
-                        cells=[
-                            ft.DataCell(ft.Text(str(tool.id))),
-                            ft.DataCell(ft.Text(tool.tool_name or "")),
-                            ft.DataCell(ft.Text(tool.tool_number or "")),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(tool.quantity)
-                                    if tool.quantity is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(tool.buy_price)
-                                    if tool.buy_price is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(tool.sell_price)
-                                    if tool.sell_price is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(tool.remaining)
-                                    if tool.remaining is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(ft.Text(tool.notes or "")),
-                            ft.DataCell(action_icons),
-                        ]
-                    )
-                )
-        page.update()
-
-    def update_books_table():
-        with db_session() as db:
-            if current_filter["search_query"]:
-                books = BookForSaleService.get_all_books(db)
-                books = [
-                    b
-                    for b in books
-                    if current_filter["search_query"].lower()
-                    in (b.book_name or "").lower()
-                ]
-            else:
-                books = BookForSaleService.get_all_books(db)
-            if books_table.rows is None:
-                books_table.rows = []
-            else:
-                books_table.rows.clear()
+            # Get books
+            books = BookForSaleService.get_all_books(db)
             for book in books:
-                books_table.rows.append(
-                    ft.DataRow(
-                        cells=[
-                            ft.DataCell(ft.Text(str(book.id))),
-                            ft.DataCell(ft.Text(book.book_name or "")),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(book.quantity)
-                                    if book.quantity is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(book.buy_price)
-                                    if book.buy_price is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(book.sell_price)
-                                    if book.sell_price is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(
-                                ft.Text(
-                                    str(book.remaining)
-                                    if book.remaining is not None
-                                    else ""
-                                )
-                            ),
-                            ft.DataCell(ft.Text(book.notes or "")),
-                        ]
-                    )
+                if current_filter["search_query"]:
+                    if not (
+                        current_filter["search_query"].lower()
+                        in (book.book_name or "").lower()
+                        or current_filter["search_query"].lower()
+                        in (book.notes or "").lower()
+                    ):
+                        continue
+                all_items.append(
+                    {
+                        "type": "كتاب",
+                        "id": book.id,
+                        "name": book.book_name or "",
+                        "quantity": book.quantity,
+                        "buy_price": book.buy_price,
+                        "sell_price": book.sell_price,
+                        "remaining": book.remaining,
+                        "notes": book.notes or "",
+                    }
                 )
-        page.update()
-
-    def update_uniforms_table():
-        with db_session() as db:
-            if current_filter["search_query"]:
-                uniforms = UniformForSaleService.get_all_uniforms(db)
-                uniforms = [
-                    u
-                    for u in uniforms
-                    if current_filter["search_query"].lower() in (u.notes or "").lower()
-                ]
-            else:
-                uniforms = UniformForSaleService.get_all_uniforms(db)
-            if uniforms_table.rows is None:
-                uniforms_table.rows = []
-            else:
-                uniforms_table.rows.clear()
+            # Get uniforms
+            uniforms = UniformForSaleService.get_all_uniforms(db)
             for uniform in uniforms:
-                uniforms_table.rows.append(
+                if current_filter["search_query"]:
+                    if not (
+                        current_filter["search_query"].lower()
+                        in (uniform.notes or "").lower()
+                    ):
+                        continue
+                all_items.append(
+                    {
+                        "type": "زي",
+                        "id": uniform.id,
+                        "name": "زي",
+                        "quantity": uniform.quantity,
+                        "buy_price": uniform.buy_price,
+                        "sell_price": uniform.sell_price,
+                        "remaining": uniform.remaining,
+                        "notes": uniform.notes or "",
+                    }
+                )
+            # Filter by category
+            if category == "tools":
+                all_items = [item for item in all_items if item["type"] == "أداة"]
+            elif category == "books":
+                all_items = [item for item in all_items if item["type"] == "كتاب"]
+            elif category == "uniforms":
+                all_items = [item for item in all_items if item["type"] == "زي"]
+            # For "all", no filter
+
+            if all_table.rows is None:
+                all_table.rows = []
+            else:
+                all_table.rows.clear()
+            for item in all_items:
+                actions_cell = ft.DataCell(ft.Text(""))  # Default empty
+                if category == "tools" and item["type"] == "أداة":
+                    action_icons = ft.Row(
+                        [
+                            ft.IconButton(
+                                icon=ft.Icons.EDIT,
+                                icon_color=ft.Colors.ORANGE,
+                                tooltip="تعديل",
+                                on_click=lambda e, tool_id=item["id"]: open_edit_dialog(
+                                    tool_id
+                                ),
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE,
+                                icon_color=DELETE_BUTTON_COLOR,
+                                tooltip="حذف",
+                                on_click=lambda e, tool_id=item[
+                                    "id"
+                                ]: confirm_delete_tool(tool_id),
+                            ),
+                        ],
+                        spacing=5,
+                    )
+                    actions_cell = ft.DataCell(action_icons)
+                all_table.rows.append(
                     ft.DataRow(
                         cells=[
-                            ft.DataCell(ft.Text(str(uniform.id))),
+                            ft.DataCell(ft.Text(item["type"])),
+                            ft.DataCell(ft.Text(item["name"])),
                             ft.DataCell(
                                 ft.Text(
-                                    str(uniform.quantity)
-                                    if uniform.quantity is not None
+                                    str(item["quantity"])
+                                    if item["quantity"] is not None
                                     else ""
                                 )
                             ),
                             ft.DataCell(
                                 ft.Text(
-                                    str(uniform.buy_price)
-                                    if uniform.buy_price is not None
+                                    str(item["buy_price"])
+                                    if item["buy_price"] is not None
                                     else ""
                                 )
                             ),
                             ft.DataCell(
                                 ft.Text(
-                                    str(uniform.sell_price)
-                                    if uniform.sell_price is not None
+                                    str(item["sell_price"])
+                                    if item["sell_price"] is not None
                                     else ""
                                 )
                             ),
                             ft.DataCell(
                                 ft.Text(
-                                    str(uniform.remaining)
-                                    if uniform.remaining is not None
+                                    str(item["remaining"])
+                                    if item["remaining"] is not None
                                     else ""
                                 )
                             ),
-                            ft.DataCell(ft.Text(uniform.notes or "")),
+                            ft.DataCell(ft.Text(item["notes"])),
+                            actions_cell,
                         ]
                     )
                 )
         page.update()
 
     def update_current_table():
-        if current_filter["category"] == "all" or current_filter["category"] == "tools":
-            update_inventory_table()
-            table_container.content = ft.Column(
-                [inventory_table], scroll=ft.ScrollMode.AUTO
-            )
-        elif current_filter["category"] == "books":
-            update_books_table()
-            table_container.content = ft.Column(
-                [books_table], scroll=ft.ScrollMode.AUTO
-            )
-        elif current_filter["category"] == "uniforms":
-            update_uniforms_table()
-            table_container.content = ft.Column(
-                [uniforms_table], scroll=ft.ScrollMode.AUTO
-            )
+        update_all_table(current_filter["category"])
+        table_container.content = ft.Column([all_table], scroll=ft.ScrollMode.AUTO)
         page.update()
 
     # Buttons for switching tables
@@ -358,13 +260,13 @@ def create_inventory_tab(page: ft.Page):
 
     # Create add dialogs and buttons
     add_inventory_dialog, open_add_inventory_dialog = create_add_inventory_dialog(
-        page, update_inventory_table
+        page, update_current_table
     )
     add_book_dialog, open_add_book_dialog = create_add_book_dialog(
-        page, update_books_table
+        page, update_current_table
     )
     add_uniform_dialog, open_add_uniform_dialog = create_add_uniform_dialog(
-        page, update_uniforms_table
+        page, update_current_table
     )
 
     # Add buttons
@@ -476,7 +378,7 @@ def create_inventory_tab(page: ft.Page):
             return
 
         try:
-            from DTOs.tool_for_sale_dto import CreateToolForSaleDTO
+            from DTOs.tool_for_sale_dto import UpdateToolForSaleDTO
 
             # Parse the values
             quantity = int(edit_quantity.value) if edit_quantity.value else None
@@ -484,20 +386,16 @@ def create_inventory_tab(page: ft.Page):
             sell_price = float(edit_sell_price.value) if edit_sell_price.value else None
             remaining = int(edit_remaining.value) if edit_remaining.value else None
 
-            tool_data = CreateToolForSaleDTO(
-                tool_name=(
-                    edit_item_name.value if edit_item_name.value is not None else ""
-                ),
+            tool_data = UpdateToolForSaleDTO(
+                tool_name=(edit_item_name.value if edit_item_name.value else None),
                 tool_number=(
-                    edit_item_number.value
-                    if edit_item_number.value is not None
-                    else None
+                    edit_item_number.value if edit_item_number.value else None
                 ),
                 quantity=quantity,
                 buy_price=buy_price,
                 sell_price=sell_price,
                 remaining=remaining,
-                notes=edit_notes.value if edit_notes.value is not None else None,
+                notes=edit_notes.value if edit_notes.value else None,
             )
 
             with db_session() as db:
@@ -509,7 +407,7 @@ def create_inventory_tab(page: ft.Page):
 
                 if updated_tool:
                     close_edit_dialog()
-                    update_inventory_table()
+                    update_current_table()
                     show_success_message(page, "تم تحديث الأداة بنجاح!")
                 else:
                     show_error_message(page, "فشل في تحديث الأداة")
@@ -528,7 +426,7 @@ def create_inventory_tab(page: ft.Page):
                     try:
                         success = ToolForSaleService.delete_tool(db, tool_id)
                         if success:
-                            update_inventory_table()
+                            update_current_table()
                             show_success_message(
                                 page, f"تم حذف الأداة: {tool.tool_name}"
                             )

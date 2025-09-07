@@ -4,10 +4,8 @@ Script to check the current status of the database
 """
 
 from database import db_session
-from models import (
-    Child, FullDayProgram, IndividualSession,
-    DailyVisit, DailyFinance
-)
+from models import Child, FullDayProgram, IndividualSession, DailyVisit, DailyFinance
+
 
 def check_db_status():
     """Check current database status"""
@@ -29,6 +27,7 @@ def check_db_status():
             print("✅ Children table is empty!")
         else:
             print("⚠️  Children table still has data!")
+
 
 if __name__ == "__main__":
     check_db_status()

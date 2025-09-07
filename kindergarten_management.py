@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from models import User as UserModel
-from database import get_db, db_session
 import hashlib, secrets
 from DTOs.user_dto import CreateUserDTO
 from logic.user_logic import UserService

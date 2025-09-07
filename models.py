@@ -1,4 +1,15 @@
-from sqlalchemy import Column, Integer, String, Date, Float, Boolean, ForeignKey, Text, DateTime,Enum as SQLAEnum
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Date,
+    Float,
+    Boolean,
+    ForeignKey,
+    Text,
+    DateTime,
+    Enum as SQLAEnum,
+)
 import datetime
 import enum
 from sqlalchemy.orm import relationship, declarative_base
@@ -10,7 +21,9 @@ class ChildTypeEnum(enum.Enum):
     SESSIONS = "جلسات"
     NONE = "غير مصنف"
 
+
 Base = declarative_base()
+
 
 # -------------------------------
 # Users and Roles
@@ -42,18 +55,21 @@ class Child(Base):
     problems = Column(String(255))
     child_image = Column(String(255))  # path to the child's image
     created_at = Column(DateTime, default=datetime.datetime.now)
-    updated_at = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+    updated_at = Column(
+        DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now
+    )
     child_type = Column(SQLAEnum(ChildTypeEnum), default=ChildTypeEnum.NONE)
     is_deleted = Column(Boolean, default=False)
     has_left = Column(Boolean, default=False)
-
 
     # Relation to user who added the child
     created_by_id = Column(Integer, ForeignKey("users.id"))
     created_by = relationship("User", back_populates="children")
 
     # One-to-one: child can have one full-day program
-    full_day_program = relationship("FullDayProgram", back_populates="child", uselist=False)
+    full_day_program = relationship(
+        "FullDayProgram", back_populates="child", uselist=False
+    )
 
     # One-to-many: child can have multiple individual sessions
     individual_sessions = relationship("IndividualSession", back_populates="child")
@@ -73,20 +89,20 @@ class FullDayProgram(Base):
     id = Column(Integer, primary_key=True)
     child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
 
-    diagnosis = Column(String(500))                                   # التشخيص
+    diagnosis = Column(String(500))  # التشخيص
 
-    monthly_fee = Column(Float)                                       # قيمة الاشتراك الشهري
-    bus_fee = Column(Float)                                           # قيمة اشتراك الباص
+    monthly_fee = Column(Float)  # قيمة الاشتراك الشهري
+    bus_fee = Column(Float)  # قيمة اشتراك الباص
 
-    birth_certificate = Column(String(255), nullable=True)            # شهادة الميلاد
-    father_id_card = Column(String(255), nullable=True)               # بطاقة الأب
+    birth_certificate = Column(String(255), nullable=True)  # شهادة الميلاد
+    father_id_card = Column(String(255), nullable=True)  # بطاقة الأب
 
-    tests_applied_file = Column(String(255), nullable=True)           # ملف الاختبارات المطبقة
-    training_plan_file = Column(String(255), nullable=True)           # ملف الخطة التدريبية
-    monthly_report_file = Column(String(255), nullable=True)          # ملف التقرير الشهري
+    tests_applied_file = Column(String(255), nullable=True)  # ملف الاختبارات المطبقة
+    training_plan_file = Column(String(255), nullable=True)  # ملف الخطة التدريبية
+    monthly_report_file = Column(String(255), nullable=True)  # ملف التقرير الشهري
 
-    notes = Column(String(1000))                                      # ملاحظات إضافية
-    attendance_status = Column(String(50))                            # Regular / Irregular
+    notes = Column(String(1000))  # ملاحظات إضافية
+    attendance_status = Column(String(50))  # Regular / Irregular
 
     child = relationship("Child", back_populates="full_day_program")
 
@@ -108,11 +124,10 @@ class IndividualSession(Base):
     specialist_name = Column(String(100))
     monthly_report_file = Column(String(255))  # ملفات التقرير الشهري
 
-    
-    birth_certificate = Column(String(255), nullable=True)     # شهادة الميلاد
-    father_id_card = Column(String(255), nullable=True)        # بطاقة الأب
+    birth_certificate = Column(String(255), nullable=True)  # شهادة الميلاد
+    father_id_card = Column(String(255), nullable=True)  # بطاقة الأب
 
-    notes = Column(String(1000))  
+    notes = Column(String(1000))
 
     child = relationship("Child", back_populates="individual_sessions")
 
@@ -214,7 +229,7 @@ class TrainingTool(Base):
     tool_image = Column(String(255))  # path to image
     department = Column(String(100))
     purchase_date = Column(Date)
-    notes = Column(String (1000))
+    notes = Column(String(1000))
 
 
 # -------------------------------

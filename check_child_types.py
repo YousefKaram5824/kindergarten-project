@@ -4,7 +4,8 @@ Script to check child_type values in the database
 """
 
 from database import db_session
-from models import Child, ChildTypeEnum
+from models import Child
+
 
 def check_child_types():
     """Check child_type values for all children"""
@@ -29,6 +30,7 @@ def check_child_types():
         print("📊 Type Distribution:")
         for child_type, count in type_counts.items():
             print(f"{child_type}: {count}")
+
 
 if __name__ == "__main__":
     check_child_types()

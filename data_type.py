@@ -1,5 +1,5 @@
 from sqlalchemy import inspect
-from database import Base, engine
+from database import engine
 
 inspector = inspect(engine)
 

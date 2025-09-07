@@ -2,7 +2,7 @@ import datetime
 import flet as ft
 
 # Local imports
-from database import get_db, db_session
+from database import db_session
 from DTOs.daily_visit_dto import CreateDailyVisitDTO, UpdateDailyVisitDTO
 from logic.daily_visit_logic import DailyVisitService
 from logic.child_logic import ChildService

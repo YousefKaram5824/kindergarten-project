@@ -4,11 +4,9 @@ Script to reset all children-related data in the database.
 This will delete all records from children and related tables.
 """
 
-from database import db_session, create_tables
-from models import (
-    Child, FullDayProgram, IndividualSession,
-    DailyVisit, DailyFinance
-)
+from database import db_session
+from models import Child, FullDayProgram, IndividualSession, DailyVisit, DailyFinance
+
 
 def reset_children_data():
     """Delete all children and related data"""
@@ -40,6 +38,7 @@ def reset_children_data():
             return False
 
     return True
+
 
 if __name__ == "__main__":
     print("🔄 Starting database reset for children data...")

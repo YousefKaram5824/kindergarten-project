@@ -105,12 +105,6 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         text_align=ft.TextAlign.RIGHT,
     )
 
-
-
-
-
-
-
     def increment_age(e):
         nonlocal age_counter
         age_counter += 1
@@ -252,7 +246,6 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                     padding=ft.padding.only(top=5, bottom=5),
                 ),
                 ft.Container(photo_status, padding=ft.padding.only(bottom=10)),
-
             ],
             width=400,
             height=800,

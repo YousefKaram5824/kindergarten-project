@@ -5,7 +5,6 @@ import flet as ft
 
 from database import db_session
 from DTOs.child_dto import UpdateChildDTO
-from models import ChildTypeEnum
 from logic.child_logic import ChildService
 
 INPUT_BGCOLOR = ft.Colors.WHITE
@@ -87,8 +86,6 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         color=ft.Colors.GREY,
         text_align=ft.TextAlign.RIGHT,
     )
-
-
 
     def edit_increment_age(e):
         nonlocal edit_age_counter

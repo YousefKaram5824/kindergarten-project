@@ -1,7 +1,7 @@
 import flet as ft
 
 # Local imports
-from database import get_db, db_session
+from database import db_session
 from logic.child_logic import ChildService
 
 
