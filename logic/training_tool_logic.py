@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from models import TrainingTool
-from DTOs.training_tool_dto import TrainingToolDTO, CreateTrainingToolDTO, UpdateTrainingToolDTO
+from DTOs.training_tool_dto import (
+    TrainingToolDTO,
+    CreateTrainingToolDTO,
+    UpdateTrainingToolDTO,
+)
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
@@ -46,10 +50,14 @@ class TrainingToolService:
 
     @staticmethod
     def search_tools(db: Session, search_query: str) -> list[TrainingToolDTO]:
-        tools = db.query(TrainingTool).filter(
-            (TrainingTool.tool_name.contains(search_query)) |
-            (TrainingTool.tool_number.contains(search_query)) |
-            (TrainingTool.department.contains(search_query)) |
-            (TrainingTool.notes.contains(search_query))
-        ).all()
+        tools = (
+            db.query(TrainingTool)
+            .filter(
+                (TrainingTool.tool_name.contains(search_query))
+                | (TrainingTool.tool_number.contains(search_query))
+                | (TrainingTool.department.contains(search_query))
+                | (TrainingTool.notes.contains(search_query))
+            )
+            .all()
+        )
         return [map_to_dto(t, TrainingToolDTO) for t in tools]

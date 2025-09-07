@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from datetime import date
+from datetime import date as Date
 from typing import Optional
 
 
@@ -8,7 +8,7 @@ class DailyVisitDTO(BaseModel):
     child_id: int
     value: Optional[float]
     appointment: Optional[str]
-    date: Optional[date]
+    date: Optional[Date]
     purpose: Optional[str]
     notes: Optional[str]
 
@@ -21,7 +21,7 @@ class CreateDailyVisitDTO(BaseModel):
     child_id: Optional[int]
     value: Optional[float]
     appointment: Optional[str]
-    date: Optional[date]
+    date: Optional[Date]
     purpose: Optional[str]
     notes: Optional[str]
 
@@ -30,7 +30,7 @@ class UpdateDailyVisitDTO(BaseModel):
     child_id: Optional[int] = None
     value: Optional[float] = None
     appointment: Optional[str] = None
-    date: Optional[date] = None # pyright: ignore[reportInvalidTypeForm]
+    date: Optional[Date] = None  # pyright: ignore[reportInvalidTypeForm]
     purpose: Optional[str] = None
     notes: Optional[str] = None
 

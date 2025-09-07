@@ -24,6 +24,7 @@ class CreateBookForSaleDTO(BaseModel):
     remaining: Optional[int]
     notes: Optional[str]
 
+
 class UpdateBookForSaleDTO(BaseModel):
     book_name: Optional[str] = None
     quantity: Optional[int] = None

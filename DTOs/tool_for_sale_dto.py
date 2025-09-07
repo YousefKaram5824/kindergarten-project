@@ -26,6 +26,7 @@ class CreateToolForSaleDTO(BaseModel):
     remaining: Optional[int]
     notes: Optional[str]
 
+
 class UpdateToolForSaleDTO(BaseModel):
     tool_name: Optional[str] = None
     quantity: Optional[int] = None

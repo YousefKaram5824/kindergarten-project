@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from models import UniformForSale
-from DTOs.uniform_for_sale_dto import UniformForSaleDTO, CreateUniformForSaleDTO, UpdateUniformForSaleDTO
+from DTOs.uniform_for_sale_dto import (
+    UniformForSaleDTO,
+    CreateUniformForSaleDTO,
+    UpdateUniformForSaleDTO,
+)
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 

@@ -22,6 +22,7 @@ class CreateUniformForSaleDTO(BaseModel):
     remaining: Optional[int]
     notes: Optional[str]
 
+
 class UpdateUniformForSaleDTO(BaseModel):
     quantity: Optional[int] = None
     buy_price: Optional[float] = None

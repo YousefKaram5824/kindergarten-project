@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from models import FullDayProgram
-from DTOs.full_day_program_dto import FullDayProgramDTO, CreateFullDayProgramDTO, UpdateFullDayProgramDTO
+from DTOs.full_day_program_dto import (
+    FullDayProgramDTO,
+    CreateFullDayProgramDTO,
+    UpdateFullDayProgramDTO,
+)
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 

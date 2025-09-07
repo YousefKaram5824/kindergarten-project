@@ -25,6 +25,7 @@ class CreateTrainingToolDTO(BaseModel):
     purchase_date: Optional[date]
     notes: Optional[str]
 
+
 class UpdateTrainingToolDTO(BaseModel):
     tool_name: Optional[str] = None
     tool_number: Optional[str] = None

@@ -54,4 +54,3 @@ class UpdateChildDTO(BaseModel):
     has_left: Optional[bool] = None
 
     model_config = ConfigDict(from_attributes=True)
-

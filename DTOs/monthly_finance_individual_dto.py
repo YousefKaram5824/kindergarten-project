@@ -30,6 +30,7 @@ class CreateMonthlyFinanceIndividualDTO(BaseModel):
     remaining: Optional[float]
     notes: Optional[str]
 
+
 class UpdateMonthlyFinanceIndividualDTO(BaseModel):
     month: Optional[str] = None
     total_income: Optional[float] = None

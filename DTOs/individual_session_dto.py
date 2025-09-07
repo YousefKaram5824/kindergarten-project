@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from datetime import date
 from typing import Optional
 
 
@@ -11,10 +10,8 @@ class IndividualSessionDTO(BaseModel):
     attended_sessions_count: Optional[int]
     specialist_name: Optional[str]
     notes: Optional[str]
-
     birth_certificate: Optional[str]
     father_id_card: Optional[str]
-
     tests_applied_file: Optional[str]
     monthly_report_file: Optional[str]
 
@@ -30,10 +27,8 @@ class CreateIndividualSessionDTO(BaseModel):
     attended_sessions_count: Optional[int]
     specialist_name: Optional[str]
     notes: Optional[str]
-
     birth_certificate: Optional[str]
     father_id_card: Optional[str]
-
     tests_applied_file: Optional[str]
     monthly_report_file: Optional[str]
 
@@ -45,14 +40,8 @@ class UpdateIndividualSessionDTO(BaseModel):
     attended_sessions_count: Optional[int] = None
     specialist_name: Optional[str] = None
     notes: Optional[str] = None
-
     birth_certificate: Optional[str] = None
     father_id_card: Optional[str] = None
-
     tests_applied_file: Optional[str] = None
     monthly_report_file: Optional[str] = None
-
     model_config = ConfigDict(from_attributes=True)
-
-
-    

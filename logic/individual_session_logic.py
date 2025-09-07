@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from models import IndividualSession
-from DTOs.individual_session_dto import IndividualSessionDTO, CreateIndividualSessionDTO, UpdateIndividualSessionDTO
+from DTOs.individual_session_dto import (
+    IndividualSessionDTO,
+    CreateIndividualSessionDTO,
+    UpdateIndividualSessionDTO,
+)
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 

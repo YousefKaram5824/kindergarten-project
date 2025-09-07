@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import date
 from typing import Optional
 
 
@@ -10,10 +9,8 @@ class FullDayProgramDTO(BaseModel):
     bus_fee: Optional[float]
     attendance_status: Optional[str]
     notes: Optional[str]
-
     birth_certificate: Optional[str]
     father_id_card: Optional[str]
-
     tests_applied_file: Optional[str]
     training_plan_file: Optional[str]
     monthly_report_file: Optional[str]
@@ -29,10 +26,8 @@ class CreateFullDayProgramDTO(BaseModel):
     bus_fee: Optional[float]
     attendance_status: Optional[str]
     notes: Optional[str]
-
     birth_certificate: Optional[str]
     father_id_card: Optional[str]
-
     tests_applied_file: Optional[str]
     training_plan_file: Optional[str]
     monthly_report_file: Optional[str]
@@ -44,10 +39,8 @@ class UpdateFullDayProgramDTO(BaseModel):
     bus_fee: Optional[float] = None
     attendance_status: Optional[str] = None
     notes: Optional[str] = None
-
     birth_certificate: Optional[str] = None
     father_id_card: Optional[str] = None
-
     tests_applied_file: Optional[str] = None
     training_plan_file: Optional[str] = None
     monthly_report_file: Optional[str] = None

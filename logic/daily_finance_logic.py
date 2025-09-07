@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Session
 from models import DailyFinance
-from DTOs.daily_finance_dto import DailyFinanceDTO, CreateDailyFinanceDTO, UpdateDailyFinanceDTO
+from DTOs.daily_finance_dto import (
+    DailyFinanceDTO,
+    CreateDailyFinanceDTO,
+    UpdateDailyFinanceDTO,
+)
 from mapper import map_to_dto, map_to_model, update_model_from_dto
 
 
