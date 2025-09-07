@@ -11,9 +11,10 @@ from mapper import map_to_dto, map_to_model, update_model_from_dto
 class FullDayProgramService:
     @staticmethod
     def create_program(
-        db: Session, program_data: CreateFullDayProgramDTO
+        db: Session, program_data: CreateFullDayProgramDTO, child_id: int
     ) -> FullDayProgramDTO:
         program = map_to_model(program_data, FullDayProgram)
+        program.child_id = child_id
         db.add(program)
         db.commit()
         db.refresh(program)

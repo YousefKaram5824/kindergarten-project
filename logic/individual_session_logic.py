@@ -11,9 +11,10 @@ from mapper import map_to_dto, map_to_model, update_model_from_dto
 class IndividualSessionService:
     @staticmethod
     def create_session(
-        db: Session, session_data: CreateIndividualSessionDTO
+        db: Session, session_data: CreateIndividualSessionDTO, child_id: int
     ) -> IndividualSessionDTO:
         session_obj = map_to_model(session_data, IndividualSession)
+        session_obj.child_id = child_id
         db.add(session_obj)
         db.commit()
         db.refresh(session_obj)

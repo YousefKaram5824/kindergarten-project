@@ -4,10 +4,10 @@ import flet as ft
 from database import db_session
 from models import ChildTypeEnum
 from logic.child_logic import ChildService
-from DTOs.child_dto import UpdateChildDTO
 from view.Child.child_details_ui import show_child_details_page
 from view.Child.add_child_ui import create_add_child_dialog
 from view.Child.edit_child_ui import create_edit_child_dialog
+from view.Child.select_child_type_ui import open_type_selection_dialog
 
 
 # Color constants
@@ -176,49 +176,13 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             return ft.DataCell(
                 ft.ElevatedButton(
                     text="اختر النوع",
-                    on_click=lambda e, cid=child.id: open_type_dialog(cid)
+                    on_click=lambda e, cid=child.id: open_type_selection_dialog(
+                        page, cid, update_all_tables
+                    ),
                 )
             )
         else:
             return ft.DataCell(ft.Text(child.child_type.value))
-
-    def open_type_dialog(child_id):
-        def save_type(e):
-            selected_type = type_dropdown.value
-            if selected_type:
-                with db_session() as db:
-                    update_dto = UpdateChildDTO(child_type=ChildTypeEnum[selected_type])
-                    success = ChildService.update_child(db, child_id, update_dto)
-                    if success:
-                        update_all_tables()
-                        snackbar = ft.SnackBar(
-                            content=ft.Text("تم تحديث نوع الطالب"),
-                            bgcolor=ft.Colors.GREEN,
-                            duration=3000,
-                        )
-                        page.overlay.append(snackbar)
-                        page.update()
-                        snackbar.open = True
-                        snackbar.update()
-            page.close(dialog)
-
-        type_dropdown = ft.Dropdown(
-            label="اختر نوع الطالب",
-            options=[
-                ft.dropdown.Option(ChildTypeEnum.FULL_DAY.name, ChildTypeEnum.FULL_DAY.value),
-                ft.dropdown.Option(ChildTypeEnum.SESSIONS.name, ChildTypeEnum.SESSIONS.value),
-            ]
-        )
-
-        dialog = ft.AlertDialog(
-            title=ft.Text("اختيار نوع الطالب"),
-            content=type_dropdown,
-            actions=[
-                ft.TextButton("حفظ", on_click=save_type),
-                ft.TextButton("إلغاء", on_click=lambda e: page.close(dialog)),
-            ],
-        )
-        page.open(dialog)
 
     def update_child_table():
         # Get childs from database using ChildService with search and type filter
