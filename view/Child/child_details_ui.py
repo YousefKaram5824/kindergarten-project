@@ -33,7 +33,7 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
         """Navigate back to student table"""
         page.clean()
         # Import here to avoid circular imports
-        from view.child_ui import create_child_registration_tab
+        from view.Child.child_ui import create_child_registration_tab
         from view.dashboard_ui import create_back_button
 
         student_tab = create_child_registration_tab(page, current_user)

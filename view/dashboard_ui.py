@@ -3,12 +3,12 @@ import time
 import asyncio
 
 # Local imports
-from view.auth_ui import set_show_main_system_callback, show_login_page
+from view.Authentication.auth_ui import set_show_main_system_callback, show_login_page
 from database import db_session
 from view.financial_ui import create_financial_tab
-from view.inventory_ui import create_inventory_tab
+from view.Inventory.inventory_ui import create_inventory_tab
 from view.reports_ui import create_reports_tab
-from view.child_ui import create_child_registration_tab
+from view.Child.child_ui import create_child_registration_tab
 from view.daily_visit_ui import create_daily_visit_tab
 from logic.child_logic import ChildService
 from logic.tool_for_sale_logic import ToolForSaleService

@@ -1,6 +1,6 @@
 import flet as ft
 from database import get_db
-from view.auth_ui import set_show_main_system_callback, show_login_page
+from view.Authentication.auth_ui import set_show_main_system_callback, show_login_page
 from view.dashboard_ui import show_main_system
 from kindergarten_management import auth_manager
 

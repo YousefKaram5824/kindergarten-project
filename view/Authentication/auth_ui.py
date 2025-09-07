@@ -2,8 +2,8 @@ import flet as ft
 
 from kindergarten_management import auth_manager
 from database import db_session
-from view.forgot_password_ui import show_forgot_password_dialog
-from view.create_account_ui import show_create_account_dialog
+from view.Authentication.forgot_password_ui import show_forgot_password_dialog
+from view.Authentication.create_account_ui import show_create_account_dialog
 
 
 # This will be set by the main application

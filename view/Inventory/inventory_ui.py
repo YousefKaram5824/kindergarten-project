@@ -6,12 +6,12 @@ from database import db_session
 from logic.tool_for_sale_logic import ToolForSaleService
 from logic.book_for_sale_logic import BookForSaleService
 from logic.uniform_for_sale_logic import UniformForSaleService
-from view.add_tool_dialog import create_add_inventory_dialog
-from view.add_book_dialog import create_add_book_dialog
-from view.add_uniform_dialog import create_add_uniform_dialog
-from view.edit_tool_dialog import create_edit_tool_dialog
-from view.edit_book_dialog import create_edit_book_dialog
-from view.edit_uniform_dialog import create_edit_uniform_dialog
+from view.Inventory.add_tool_dialog import create_add_inventory_dialog
+from view.Inventory.add_book_dialog import create_add_book_dialog
+from view.Inventory.add_uniform_dialog import create_add_uniform_dialog
+from view.Inventory.edit_tool_dialog import create_edit_tool_dialog
+from view.Inventory.edit_book_dialog import create_edit_book_dialog
+from view.Inventory.edit_uniform_dialog import create_edit_uniform_dialog
 
 # Color constants
 INPUT_BGCOLOR = ft.Colors.WHITE
