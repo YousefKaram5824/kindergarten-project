@@ -1,7 +1,17 @@
-# TODO: Add View Button Next to Child Type
+# TODO: Implement New Page for Child Type Data with Back Button
 
-## Tasks
-- [x] Modify `create_type_cell` function in `view/child/child_ui.py` to add a view button next to the child's type
-- [x] Add handler function for the view button to display child's data according to type
-- [x] Implement view functionality (dialog or page) showing type-specific data
-- [ ] Test the new view button functionality
+## Steps to Complete
+
+- [x] Create new file: view/Child/child_type_data_ui.py
+  - Implemented show_child_type_data_page function
+  - Handles page cleaning and navigation
+  - Displays child's basic info and type-specific data (full day or sessions)
+  - Adds back button to return to children table
+
+- [x] Modify view/Child/child_ui.py
+  - Updated view_child_type_data function to call new page instead of dialog
+  - Imported the new show_child_type_data_page function
+
+- [x] Test the new page navigation
+  - Verified back button returns to children table
+  - Ensured data displays correctly for both child types
