@@ -16,7 +16,7 @@ class FullDayProgramDTO(BaseModel):
     monthly_report_file: Optional[str]
 
     class Config:
-        orm_mode = True
+        #orm_mode = True
         from_attributes = True
 
 
@@ -46,5 +46,5 @@ class UpdateFullDayProgramDTO(BaseModel):
     monthly_report_file: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        #orm_mode = True
         from_attributes = True
