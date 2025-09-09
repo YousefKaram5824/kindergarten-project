@@ -130,6 +130,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             page.update()
 
     current_edit_visit_id = None
+    edit_child_id = None
 
     def edit_visit(visit_id):
         """Edit visit details"""
@@ -138,8 +139,11 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             visit = DailyVisitService.get_visit(db, visit_id)
             if visit:
                 current_edit_visit_id = visit_id
+                nonlocal edit_child_id
+                edit_child_id = visit.child_id
                 # Populate edit form with visit data
-                edit_child_dropdown.value = str(visit.child_id)
+                child = ChildService.get_child_by_id(db, visit.child_id)
+                edit_child_text.value = child.name if child else "غير معروف"
                 edit_appointment.value = visit.appointment or ""
                 edit_date.value = visit.date.strftime("%Y-%m-%d") if visit.date else ""
                 edit_selected_date = visit.date if visit.date else None
@@ -336,11 +340,11 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
     page.overlay.append(date_picker)
 
     # Edit form fields (similar to add form)
-    edit_child_dropdown = ft.Dropdown(
+    edit_child_text = ft.TextField(
         label="اسم الطفل",
         width=300,
         text_align=ft.TextAlign.RIGHT,
-        options=[],  # Will be populated
+        read_only=True,
     )
 
     edit_appointment = ft.TextField(
@@ -399,7 +403,7 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
         title=ft.Text("تعديل بيانات الزيارة", text_align=ft.TextAlign.CENTER),
         content=ft.Column(
             [
-                edit_child_dropdown,
+                edit_child_text,
                 edit_appointment,
                 ft.Row(
                     [edit_date_picker_btn, edit_date],
@@ -439,27 +443,22 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                 for child in children
             ]
             child_dropdown.options = options
-            edit_child_dropdown.options = options
             page.update()
 
     def save_edit_visit():
-        nonlocal current_edit_visit_id
+        nonlocal current_edit_visit_id, edit_child_id
         if not current_edit_visit_id:
             show_error("لم يتم العثور على الزيارة المراد تعديلها!")
             return
 
         # Validate required fields
-        if not edit_child_dropdown.value:
-            show_error("يجب اختيار الطفل!")
-            return
-
         if not edit_date.value:
             show_error("يجب اختيار التاريخ!")
             return
 
         # Create visit DTO with updated data
         visit_data = UpdateDailyVisitDTO(
-            child_id=int(edit_child_dropdown.value),
+            child_id=edit_child_id,
             appointment=edit_appointment.value if edit_appointment.value else None,
             date=datetime.datetime.strptime(edit_date.value, "%Y-%m-%d").date(),
             purpose=edit_purpose.value if edit_purpose.value else None,
@@ -477,12 +476,15 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                 if visit_dto:
                     # Close dialog and refresh table
                     close_edit_dialog()
+                    current_edit_visit_id = None
                     update_visit_table()
                     show_success("تم تعديل بيانات الزيارة بنجاح!")
                 else:
                     show_error("فشل في تعديل بيانات الزيارة!")
+                    close_edit_dialog()
             except Exception as ex:
                 show_error(f"خطأ في تعديل بيانات الزيارة: {str(ex)}")
+                close_edit_dialog()
 
     def close_edit_dialog():
         page.close(edit_visit_dialog)
@@ -523,8 +525,10 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
                     show_success("تم إضافة الزيارة بنجاح!")
                 else:
                     show_error("فشل في إضافة الزيارة!")
+                    close_dialog()
             except Exception as ex:
                 show_error(f"خطأ في إضافة الزيارة: {str(ex)}")
+                close_dialog()
 
     def show_error(message):
         snackbar = ft.SnackBar(
@@ -532,10 +536,8 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             bgcolor=ft.Colors.RED,
             duration=3000,
         )
-        page.overlay.append(snackbar)
-        page.update()
         snackbar.open = True
-        snackbar.update()
+        page.overlay.append(snackbar)
         page.update()
 
     def show_success(message):
@@ -544,10 +546,8 @@ def create_daily_visit_tab(page: ft.Page, current_user=None):
             bgcolor=ft.Colors.GREEN,
             duration=3000,
         )
-        page.overlay.append(snackbar)
-        page.update()
         snackbar.open = True
-        snackbar.update()
+        page.overlay.append(snackbar)
         page.update()
 
     def reset_form():

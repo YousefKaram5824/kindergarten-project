@@ -5,6 +5,7 @@ from database import db_session
 from models import ChildTypeEnum
 from logic.child_logic import ChildService
 from view.Child.child_details_ui import show_child_details_page
+from view.Child.select_child_type_view_ui import open_child_view_only
 from view.Child.add_child_ui import create_add_child_dialog
 from view.Child.edit_child_ui import create_edit_child_dialog
 from view.Child.select_child_type_ui import open_type_selection_dialog

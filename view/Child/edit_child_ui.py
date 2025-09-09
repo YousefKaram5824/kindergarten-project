@@ -77,6 +77,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         width=300,
     )
     edit_photo_path = None
+    _edit_selected_file = None
     edit_photo_preview = ft.Image(
         src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False
     )
@@ -217,28 +218,15 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
     page.overlay.append(edit_date_picker)
 
     def edit_handle_file_picker_result(e: ft.FilePickerResultEvent):
-        nonlocal edit_photo_path
+        nonlocal edit_photo_path, _edit_selected_file
         if e.files:
-            # Create child_photos directory if it doesn't exist
-            photos_dir = "child_photos"
-            if not os.path.exists(photos_dir):
-                os.makedirs(photos_dir)
+            # Store the selected file temporarily without copying
+            _edit_selected_file = e.files[0]
 
-            # Copy the file to child_photos directory
-            uploaded_file = e.files[0]
-            file_extension = os.path.splitext(uploaded_file.name)[1]
-            new_filename = (
-                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
-            )
-            edit_photo_path = os.path.join(photos_dir, new_filename)
-
-            # Copy the file
-            shutil.copy2(uploaded_file.path, edit_photo_path)
-
-            # Update UI
-            edit_photo_preview.src = edit_photo_path
+            # Update UI with temporary file path (original path)
+            edit_photo_preview.src = _edit_selected_file.path
             edit_photo_preview.visible = True
-            edit_photo_status.value = f"تم اختيار: {uploaded_file.name}"
+            edit_photo_status.value = f"تم اختيار: {_edit_selected_file.name}"
             edit_photo_status.color = ft.Colors.GREEN
             page.update()
 
@@ -247,7 +235,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
     page.overlay.append(edit_file_picker)
 
     def save_edit_child():
-        nonlocal current_edit_child_id
+        nonlocal current_edit_child_id, _edit_selected_file, edit_photo_path
         if not current_edit_child_id:
             show_error("لم يتم العثور على الطالب المراد تعديله!")
             return
@@ -268,6 +256,20 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         if not edit_birth_date.value:
             show_error("يجب اختيار تاريخ الميلاد!")
             return
+
+        # If a photo file was selected, copy it now
+        if _edit_selected_file:
+            photos_dir = "child_photos"
+            if not os.path.exists(photos_dir):
+                os.makedirs(photos_dir)
+
+            file_extension = os.path.splitext(_edit_selected_file.name)[1]
+            new_filename = (
+                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            )
+            edit_photo_path = os.path.join(photos_dir, new_filename)
+
+            shutil.copy2(_edit_selected_file.path, edit_photo_path)
 
         # Create child DTO with updated data
         child_data = UpdateChildDTO(
@@ -307,6 +309,8 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 show_error(f"خطأ في تعديل بيانات الطالب: {str(ex)}")
 
     def close_edit_dialog():
+        nonlocal _edit_selected_file
+        _edit_selected_file = None
         page.close(edit_child_dialog)
 
     def show_error(message):

@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 import shutil
 import flet as ft
 
@@ -283,28 +284,15 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
     page.overlay.append(created_at_time_picker)
 
     def handle_file_picker_result(e: ft.FilePickerResultEvent):
-        nonlocal photo_path
+        nonlocal photo_path, _selected_file
         if e.files:
-            # Create child_photos directory if it doesn't exist
-            photos_dir = "child_photos"
-            if not os.path.exists(photos_dir):
-                os.makedirs(photos_dir)
+            # Store the selected file temporarily without copying
+            _selected_file = e.files[0]
 
-            # Copy the file to child_photos directory
-            uploaded_file = e.files[0]
-            file_extension = os.path.splitext(uploaded_file.name)[1]
-            new_filename = (
-                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
-            )
-            photo_path = os.path.join(photos_dir, new_filename)
-
-            # Copy the file
-            shutil.copy2(uploaded_file.path, photo_path)
-
-            # Update UI
-            photo_preview.src = photo_path
+            # Update UI with temporary file path (original path)
+            photo_preview.src = _selected_file.path
             photo_preview.visible = True
-            photo_status.value = f"تم اختيار: {uploaded_file.name}"
+            photo_status.value = f"تم اختيار: {_selected_file.name}"
             photo_status.color = ft.Colors.GREEN
             page.update()
 
@@ -312,7 +300,10 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
     file_picker = ft.FilePicker(on_result=handle_file_picker_result)
     page.overlay.append(file_picker)
 
+    _selected_file = None
+
     def add_child():
+        nonlocal photo_path, _selected_file
         # Validate required fields
         if not child_id.value:
             show_error("يجب إدخال رقم التعريفي!")
@@ -362,7 +353,23 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         else:
             created_at_value = datetime.datetime.now()
 
-        # Create child DTO with created_at value
+        # If a photo file was selected, copy it now
+        if _selected_file:
+            # Create a folder named after the child's name
+            child_name_str = str(child_name.value).strip()
+            # Sanitize the folder name (replace spaces and special chars with underscores)
+            folder_name = re.sub(r'[^\w\-_\.]', '_', child_name_str)
+            child_folder = os.path.join("child_documents", folder_name)
+            if not os.path.exists(child_folder):
+                os.makedirs(child_folder)
+
+            file_extension = os.path.splitext(_selected_file.name)[1]
+            new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            photo_path = os.path.join(child_folder, new_filename)
+
+            shutil.copy2(_selected_file.path, photo_path)
+
+        # Create child DTO with created_at value and photo_path
         child_data = CreateChildDTO(
             id=child_id_int,
             name=str(child_name.value),
@@ -422,7 +429,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         page.update()
 
     def reset_form():
-        nonlocal age_counter, photo_path, selected_date, selected_created_at_date, selected_created_at_time
+        nonlocal age_counter, photo_path, selected_date, selected_created_at_date, selected_created_at_time, _selected_file
         child_id.value = ""
         child_name.value = ""
         age_counter = 3
@@ -439,6 +446,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         problem.value = ""
         additional_notes.value = ""
         photo_path = None
+        _selected_file = None
         photo_preview.src = ""
         photo_preview.visible = False
         photo_status.value = "لم يتم اختيار صورة"
