@@ -20,12 +20,13 @@ from logic.individual_session_logic import IndividualSessionService
 
 class ChildDetailsView:
     def __init__(
-        self, page: ft.Page, child_id: int, update_callback=None, is_edit=False
+        self, page: ft.Page, child_id: int, update_callback=None, is_edit=False, current_user=None
     ):
         self.page = page
         self.child_id = child_id
         self.update_callback = update_callback
         self.is_edit = is_edit
+        self.current_user = current_user
         self.current_file_type = None
 
         # File paths
@@ -870,15 +871,19 @@ class ChildDetailsView:
         self.page.update()
 
     def go_back(self, e=None):
-        # Navigate back to the previous view
         if self.update_callback:
             self.update_callback()
-        # You might want to implement proper navigation here
-        # For example: self.page.go("/children") or similar
+        # Clear the page and reload the children table view
+        self.page.clean()
+        from view.Child.child_ui import create_child_registration_tab, create_back_button
+
+        self.page.add(create_back_button(self.page, self.current_user))
+        self.page.add(create_child_registration_tab(self.page, self.current_user))
+        self.page.update()
 
 
 def create_child_details_view(
-    page: ft.Page, child_id: int, update_callback=None, is_edit=False
+    page: ft.Page, child_id: int, update_callback=None, is_edit=False, current_user=None
 ):
     """
     Create and return the child details view
@@ -888,37 +893,38 @@ def create_child_details_view(
         child_id: ID of the child to display/edit
         update_callback: Callback function to call when data is updated
         is_edit: Whether the view is in edit mode or view-only mode
+        current_user: Current user object
 
     Returns:
         Container with the child details view
     """
-    view = ChildDetailsView(page, child_id, update_callback, is_edit)
+    view = ChildDetailsView(page, child_id, update_callback, is_edit, current_user)
     return view.create_layout()
 
 
 # Example usage functions
-def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None):
+def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None, current_user=None):
     """Open child details in edit mode"""
     page.clean()
     child_view = create_child_details_view(
-        page, child_id, update_callback, is_edit=True
+        page, child_id, update_callback, is_edit=True, current_user=current_user
     )
     page.add(child_view)
     page.update()
 
 
-def open_child_view_only(page: ft.Page, child_id: int, update_callback=None):
+def open_child_view_only(page: ft.Page, child_id: int, update_callback=None, current_user=None):
     """Open child details in view-only mode"""
     page.clean()
     child_view = create_child_details_view(
-        page, child_id, update_callback, is_edit=False
+        page, child_id, update_callback, is_edit=False, current_user=current_user
     )
     page.add(child_view)
     page.update()
 
 
 # Alternative: Use as a route in Flet routing system
-def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False):
+def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False, current_user=None):
     """
     Route handler for child details page
     Usage with Flet routing:
@@ -928,5 +934,5 @@ def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False):
     def handle_back():
         page.go("/child_ui")  # Navigate back to children list
 
-    child_view = create_child_details_view(page, child_id, handle_back, is_edit)
+    child_view = create_child_details_view(page, child_id, handle_back, is_edit, current_user)
     return child_view

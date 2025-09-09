@@ -180,7 +180,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 ft.ElevatedButton(
                     text="اختر النوع",
                     on_click=lambda e, cid=child.id: open_type_selection_dialog(
-                        page, cid, update_all_tables
+                        page, cid, update_all_tables, current_user=current_user
                     ),
                 )
             )
@@ -200,7 +200,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             icon_color=ft.Colors.BLUE,
                             tooltip="تعديل النوع والبيانات",
                             on_click=lambda e, cid=child.id: open_type_selection_dialog(
-                                page, cid, update_all_tables, is_edit=True
+                                page, cid, update_all_tables, is_edit=True, current_user=current_user
                             ),
                         ),
                     ],

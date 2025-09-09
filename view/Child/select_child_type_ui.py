@@ -21,7 +21,7 @@ from logic.individual_session_logic import IndividualSessionService
 
 
 def open_child_details_view(
-    page: ft.Page, child_id: int, update_callback=None, is_edit=False
+    page: ft.Page, child_id: int, update_callback=None, is_edit=False, current_user=None
 ):
     """Open child details as a full page view"""
 
@@ -62,9 +62,10 @@ def open_child_details_view(
             update_callback()
         # Clear the page and reload the children table view
         page.clean()
-        from view.Child.child_ui import create_child_registration_tab
+        from view.Child.child_ui import create_child_registration_tab, create_back_button
 
-        page.add(create_child_registration_tab(page))
+        page.add(create_back_button(page, current_user))
+        page.add(create_child_registration_tab(page, current_user))
         page.update()
 
     back_button = ft.Container(
@@ -821,17 +822,17 @@ def open_child_details_view(
 
 # Alternative function names for compatibility
 def open_type_selection_dialog(
-    page: ft.Page, child_id: int, update_callback=None, is_edit=True
+    page: ft.Page, child_id: int, update_callback=None, is_edit=True, current_user=None
 ):
     """Compatibility function"""
-    open_child_details_view(page, child_id, update_callback, is_edit)
+    open_child_details_view(page, child_id, update_callback, is_edit, current_user)
 
 
-def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None):
+def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None, current_user=None):
     """Open child details in edit mode"""
-    open_child_details_view(page, child_id, update_callback, is_edit=True)
+    open_child_details_view(page, child_id, update_callback, is_edit=True, current_user=current_user)
 
 
-def open_child_view_only(page: ft.Page, child_id: int, update_callback=None):
+def open_child_view_only(page: ft.Page, child_id: int, update_callback=None, current_user=None):
     """Open child details in view-only mode"""
-    open_child_details_view(page, child_id, update_callback, is_edit=False)
+    open_child_details_view(page, child_id, update_callback, is_edit=False, current_user=current_user)
