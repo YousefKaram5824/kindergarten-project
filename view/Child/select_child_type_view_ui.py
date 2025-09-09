@@ -6,8 +6,9 @@ from pathlib import Path
 
 # Local imports
 from database import db_session
-from models import ChildTypeEnum
+from database import get_db
 from logic.child_logic import ChildService
+from models import ChildTypeEnum
 from DTOs.child_dto import UpdateChildDTO
 from DTOs.full_day_program_dto import CreateFullDayProgramDTO, UpdateFullDayProgramDTO
 from DTOs.individual_session_dto import (
@@ -28,6 +29,9 @@ class ChildDetailsView:
         self.is_edit = is_edit
         self.current_user = current_user
         self.current_file_type = None
+        
+        # Store child data
+        self.child_data = None
 
         # File paths
         self.birth_certificate_path = None
@@ -39,9 +43,13 @@ class ChildDetailsView:
         self.init_components()
 
     def init_components(self):
+        # Load child data first
+        self.load_child_data()
+        
         # Title
+        child_name = self.child_data.name if self.child_data else "غير محدد"
         self.title = ft.Text(
-            "تعديل بيانات الطالب" if self.is_edit else "عرض بيانات الطالب",
+            f"تعديل بيانات الطالب: {child_name}" if self.is_edit else f"عرض بيانات الطالب: {child_name}",
             size=24,
             weight=ft.FontWeight.BOLD,
             text_align=ft.TextAlign.RIGHT,
@@ -67,10 +75,39 @@ class ChildDetailsView:
         self.page.overlay.append(self.file_picker)
 
         # Load existing data if editing
-        if self.is_edit:
+        if self.is_edit and self.child_data:
             self.load_existing_data()
 
+    def load_child_data(self):
+        """Load child data from database"""
+        try:
+            with db_session() as db:
+                self.child_data = ChildService.get_child_by_id(db, self.child_id)
+        except Exception as e:
+            print(f"Error loading child data: {e}")
+            self.child_data = None
+
     def init_form_fields(self):
+        # Basic child info (read-only)
+        self.name_field = ft.TextField(
+            label="اسم الطالب",
+            text_align=ft.TextAlign.RIGHT,
+            width=300,
+            read_only=True,
+            value=self.child_data.name if self.child_data else "",
+        )
+        
+        self.age_field = ft.TextField(
+            label="العمر",
+            text_align=ft.TextAlign.RIGHT,
+            width=150,
+            read_only=True,
+            value=str(self.child_data.age) if self.child_data and self.child_data.age else "",
+        )
+        
+        
+        
+
         # Type dropdown
         self.type_dropdown = ft.Dropdown(
             label="نوع الطالب",
@@ -86,6 +123,11 @@ class ChildDetailsView:
             text_align=ft.TextAlign.RIGHT,
             width=300,
             disabled=not self.is_edit,
+            value=(
+                self.child_data.child_type.name 
+                if self.child_data and self.child_data.child_type != ChildTypeEnum.NONE 
+                else None
+            ),
         )
 
         # Common fields
@@ -297,6 +339,34 @@ class ChildDetailsView:
         return card
 
     def create_layout(self):
+        # Child basic info section
+        basic_info_section = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(
+                        "البيانات الأساسية للطالب",
+                        size=20,
+                        weight=ft.FontWeight.BOLD,
+                        color=ft.Colors.INDIGO_700,
+                    ),
+                    ft.Divider(),
+                    ft.Row(
+                        [
+                            self.name_field,
+                            ft.Container(width=20),
+                            self.age_field,
+                        ],
+                        alignment=ft.MainAxisAlignment.END,
+                    ),
+                    
+                ]
+            ),
+            padding=20,
+            bgcolor=ft.Colors.INDIGO_50,
+            border_radius=10,
+            margin=ft.margin.only(bottom=20),
+        )
+
         # Common fields section
         common_section = ft.Container(
             content=ft.Column(
@@ -465,6 +535,7 @@ class ChildDetailsView:
             [
                 self.header,
                 ft.Divider(height=20),
+                basic_info_section,
                 common_section,
                 self.full_day_section,
                 self.sessions_section,
@@ -474,35 +545,39 @@ class ChildDetailsView:
             scroll=ft.ScrollMode.AUTO,
         )
 
+        # Set initial visibility based on child type
+        if self.child_data and self.child_data.child_type:
+            self.update_field_visibility(self.child_data.child_type.name)
+
         return ft.Container(content=content, padding=30, expand=True)
 
     def load_existing_data(self):
-        with db_session() as db:
-            child = ChildService.get_child_by_id(db, self.child_id)
-            if not child:
-                return
+        if not self.child_data:
+            return
 
-            self.type_dropdown.value = (
-                child.child_type.name
-                if child.child_type != ChildTypeEnum.NONE
-                else None
-            )
+        # Set the type dropdown value
+        if self.child_data.child_type != ChildTypeEnum.NONE:
+            self.type_dropdown.value = self.child_data.child_type.name
 
-            if child.child_type == ChildTypeEnum.FULL_DAY:
-                program = FullDayProgramService.get_program_by_child_id(
-                    db, self.child_id
-                )
-                if program:
-                    self.load_full_day_data(program)
-                    self.update_field_visibility(ChildTypeEnum.FULL_DAY.name)
+        try:
+            with db_session() as db:
+                if self.child_data.child_type == ChildTypeEnum.FULL_DAY:
+                    program = FullDayProgramService.get_program_by_child_id(
+                        db, self.child_id
+                    )
+                    if program:
+                        self.load_full_day_data(program)
+                        self.update_field_visibility(ChildTypeEnum.FULL_DAY.name)
 
-            elif child.child_type == ChildTypeEnum.SESSIONS:
-                session = IndividualSessionService.get_session_by_child_id(
-                    db, self.child_id
-                )
-                if session:
-                    self.load_sessions_data(session)
-                    self.update_field_visibility(ChildTypeEnum.SESSIONS.name)
+                elif self.child_data.child_type == ChildTypeEnum.SESSIONS:
+                    session = IndividualSessionService.get_session_by_child_id(
+                        db, self.child_id
+                    )
+                    if session:
+                        self.load_sessions_data(session)
+                        self.update_field_visibility(ChildTypeEnum.SESSIONS.name)
+        except Exception as e:
+            print(f"Error loading existing data: {e}")
 
     def load_full_day_data(self, program):
         self.diagnosis_field.value = program.diagnosis or ""
@@ -887,17 +962,63 @@ def create_child_details_view(
 ):
     """
     Create and return the child details view
-
-    Args:
-        page: Flet page object
-        child_id: ID of the child to display/edit
-        update_callback: Callback function to call when data is updated
-        is_edit: Whether the view is in edit mode or view-only mode
-        current_user: Current user object
-
-    Returns:
-        Container with the child details view
     """
+    # Check if child exists first
+    try:
+        with db_session() as db:
+            child = ChildService.get_child_by_id(db, child_id)
+            if not child:
+                return ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Icon(ft.Icons.ERROR, size=64, color=ft.Colors.RED),
+                            ft.Text(
+                                "❌ الطالب غير موجود أو تم حذفه",
+                                size=18,
+                                color=ft.Colors.RED,
+                                text_align=ft.TextAlign.CENTER,
+                            ),
+                            ft.ElevatedButton(
+                                "العودة",
+                                icon=ft.Icons.ARROW_BACK,
+                                on_click=lambda e: page.go("/children"),
+                                bgcolor=ft.Colors.GREY_600,
+                                color=ft.Colors.WHITE,
+                            ),
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=20,
+                    ),
+                    alignment=ft.alignment.center,
+                    expand=True,
+                )
+    except Exception as e:
+        return ft.Container(
+            content=ft.Column(
+                [
+                    ft.Icon(ft.Icons.ERROR, size=64, color=ft.Colors.RED),
+                    ft.Text(
+                        f"⚠️ حدث خطأ أثناء تحميل بيانات الطالب: {str(e)}",
+                        size=16,
+                        color=ft.Colors.RED,
+                        text_align=ft.TextAlign.CENTER,
+                    ),
+                    ft.ElevatedButton(
+                        "العودة",
+                        icon=ft.Icons.ARROW_BACK,
+                        on_click=lambda e: page.go("/children") if hasattr(page, 'go') else None,
+                        bgcolor=ft.Colors.GREY_600,
+                        color=ft.Colors.WHITE,
+                    ),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20,
+            ),
+            alignment=ft.alignment.center,
+            expand=True,
+        )
+
+    # Create and return the child details view
     view = ChildDetailsView(page, child_id, update_callback, is_edit, current_user)
     return view.create_layout()
 
@@ -932,7 +1053,15 @@ def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False, cur
     """
 
     def handle_back():
-        page.go("/child_ui")  # Navigate back to children list
+        if hasattr(page, 'go'):
+            page.go("/children")  # Navigate back to children list
+        else:
+            # Fallback navigation
+            page.clean()
+            from view.Child.child_ui import create_child_registration_tab, create_back_button
+            page.add(create_back_button(page, current_user))
+            page.add(create_child_registration_tab(page, current_user))
+            page.update()
 
     child_view = create_child_details_view(page, child_id, handle_back, is_edit, current_user)
     return child_view
