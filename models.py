@@ -52,6 +52,7 @@ class Child(Base):
     father_job = Column(String(100))
     mother_job = Column(String(100))
     notes = Column(String(225))
+    department = Column(String(200), nullable=False)
     problems = Column(String(255))
     child_image = Column(String(255))  # path to the child's image
     created_at = Column(DateTime, default=datetime.datetime.now)
@@ -142,8 +143,8 @@ class DailyVisit(Base):
     value = Column(Float)
     appointment = Column(String(50))
     date = Column(Date)
-    purpose = Column(Text)
-    notes = Column(Text)
+    purpose = Column(String(255))
+    notes = Column(String(255))
 
     child = relationship("Child", back_populates="daily_visits")
 
@@ -160,7 +161,7 @@ class DailyFinance(Base):
     count = Column(Integer)
     service = Column(String(50))  # FullDay / Individual
     payment_date = Column(Date)
-    notes = Column(Text)
+    notes = Column(String(255))
 
     child = relationship("Child", back_populates="daily_finances")
 
@@ -180,7 +181,7 @@ class MonthlyFinanceFullDay(Base):
     monthly_expenses = Column(Float)
     external_remaining = Column(Float)
     remaining = Column(Float)
-    notes = Column(Text)
+    notes = Column(String(255))
 
 
 # -------------------------------
@@ -194,10 +195,10 @@ class MonthlyFinanceIndividual(Base):
     specialists_total = Column(Float)
     center_total = Column(Float)
     loans = Column(Float)
-    specialists_details = Column(Text)  # JSON or text format (name, value)
+    specialists_details = Column(String(500))  # JSON or text format (name, value)
     external_remaining = Column(Float)
     remaining = Column(Float)
-    notes = Column(Text)
+    notes = Column(String(255))
 
 
 # -------------------------------
@@ -215,7 +216,7 @@ class MonthlyFinanceOverall(Base):
     external_remaining_individual = Column(Float)
     loans = Column(Float)
     current_total = Column(Float)
-    notes = Column(Text)
+    notes = Column(String(255))
 
 
 # -------------------------------
