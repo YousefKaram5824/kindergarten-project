@@ -19,6 +19,7 @@ class ChildDTO(BaseModel):
     updated_at: datetime | None = None
     child_type: ChildTypeEnum
     has_left: Optional[bool] = False
+    department: str | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,6 +38,7 @@ class CreateChildDTO(BaseModel):
     created_at: datetime | None = None
     child_type: ChildTypeEnum = ChildTypeEnum.NONE
     has_left: Optional[bool] = False
+    department: str | None
 
 
 class UpdateChildDTO(BaseModel):
@@ -52,5 +54,5 @@ class UpdateChildDTO(BaseModel):
     child_image: Optional[str] = None
     child_type: Optional[ChildTypeEnum] = None
     has_left: Optional[bool] = None
-
+    department: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)

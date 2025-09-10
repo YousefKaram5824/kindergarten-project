@@ -1,7 +1,10 @@
-# TODO: Implement Folder Creation for New Child
+# TODO: Adjust select_child_type_view_ui.py
 
-## Tasks:
-- [x] Modify add_child_ui.py to create a folder named after the child's name inside "child_documents"
-- [x] Update photo saving logic to save the photo inside the child's folder
-- [x] Update photo_path in the database to reflect the new location
-- [x] Test the implementation by adding a new child
+## Tasks
+- [x] Fix text alignment for all fields to ensure consistent right-alignment for Arabic text
+- [x] Adjust layout spacing and positioning to better match the system's design
+- [x] Fix file display issues by ensuring correct file paths and adding error handling for missing files
+- [x] Use appropriate relative paths for image previews
+- [x] Add better error handling and logging for file operations
+- [x] Test the UI changes (Manual review completed - changes applied successfully)
+- [x] Create new compatible version (select_child_type_view_ui_v2.py)

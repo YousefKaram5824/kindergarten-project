@@ -16,7 +16,6 @@ class IndividualSessionDTO(BaseModel):
     monthly_report_file: Optional[str]
 
     class Config:
-        #orm_mode = True
         from_attributes = True
 
 

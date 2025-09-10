@@ -297,6 +297,26 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
                             ft.Row(
                                 [
                                     ft.Text(
+                                        "القسم:",
+                                        size=16,
+                                        weight=ft.FontWeight.BOLD,
+                                        text_align=ft.TextAlign.RIGHT,
+                                        width=120,
+                                    ),
+                                    ft.Text(
+                                        child.department if child.department else "-",
+                                        size=16,
+                                        text_align=ft.TextAlign.RIGHT,
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.START,
+                            ),
+                            padding=ft.padding.symmetric(vertical=5),
+                        ),
+                        ft.Container(
+                            ft.Row(
+                                [
+                                    ft.Text(
                                         "تاريخ التسجيل:",
                                         size=16,
                                         weight=ft.FontWeight.BOLD,

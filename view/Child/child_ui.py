@@ -5,13 +5,10 @@ from database import db_session
 from models import ChildTypeEnum
 from logic.child_logic import ChildService
 from view.Child.child_details_ui import show_child_details_page
-from view.Child.select_child_type_view_ui import open_child_view_only
+from view.Child.select_child_type_view_ui_v2 import open_child_view_only_v2
 from view.Child.add_child_ui import create_add_child_dialog
 from view.Child.edit_child_ui import create_edit_child_dialog
 from view.Child.select_child_type_ui import open_type_selection_dialog
-from logic.full_day_program_logic import FullDayProgramService
-from logic.individual_session_logic import IndividualSessionService
-from view.Child import select_child_type_view_ui
 
 
 # Color constants
@@ -53,6 +50,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
+            ft.DataColumn(ft.Text("القسم")),
             ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
@@ -138,6 +136,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
+            ft.DataColumn(ft.Text("القسم")),
             ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
@@ -161,6 +160,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
+            ft.DataColumn(ft.Text("القسم")),
             ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
@@ -217,7 +217,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
     def view_child_type_data(child_id):
         """View child's data according to their type"""
         page.clean()
-        select_child_type_view_ui.open_child_view_only(page, child_id, current_user)
+        open_child_view_only_v2(page, child_id, current_user)
         page.update()
 
     def update_child_table():
@@ -288,6 +288,9 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             ),
                             ft.DataCell(
                                 ft.Text(child.mother_job if child.mother_job else "-")
+                            ),
+                            ft.DataCell(
+                                ft.Text(child.department if child.department else "-")
                             ),
                             create_type_cell(child),
                             ft.DataCell(action_icons),
@@ -367,6 +370,9 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             ft.DataCell(
                                 ft.Text(child.mother_job if child.mother_job else "-")
                             ),
+                            ft.DataCell(
+                                ft.Text(child.department if child.department else "-")
+                            ),
                             create_type_cell(child),
                             ft.DataCell(action_icons),
                         ]
@@ -444,6 +450,9 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             ),
                             ft.DataCell(
                                 ft.Text(child.mother_job if child.mother_job else "-")
+                            ),
+                            ft.DataCell(
+                                ft.Text(child.department if child.department else "-")
                             ),
                             create_type_cell(child),
                             ft.DataCell(action_icons),

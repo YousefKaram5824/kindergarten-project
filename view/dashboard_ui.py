@@ -16,7 +16,6 @@ from logic.training_tool_logic import TrainingToolService
 from logic.uniform_for_sale_logic import UniformForSaleService
 from logic.book_for_sale_logic import BookForSaleService
 from logic.user_logic import UserService
-from models import ChildTypeEnum
 
 
 class HoverNavigationRail(ft.Container):

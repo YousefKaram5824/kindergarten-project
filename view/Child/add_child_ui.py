@@ -95,6 +95,18 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
+    department = ft.Dropdown(
+        label="القسم",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        options=[
+            ft.dropdown.Option("قسم التخاطب و العلاج السلوكي"),
+            ft.dropdown.Option("قسم التأخر"),
+            ft.dropdown.Option("قسم التوحد"),
+            ft.dropdown.Option("قسم صعوبات التعلم"),
+            ft.dropdown.Option("القسم المختلط"),
+        ],
+    )
     photo_path = None
     photo_preview = ft.Image(
         src="", width=100, height=100, fit=ft.ImageFit.COVER, visible=False
@@ -232,6 +244,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                 mum_job,
                 problem,
                 additional_notes,
+                department,
                 ft.Container(
                     ft.Text(
                         "صورة الطفل:",
@@ -337,6 +350,10 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             show_error("يجب اختيار تاريخ الميلاد!")
             return
 
+        if not department.value:
+            show_error("يجب اختيار القسم!")
+            return
+
         # Validate created_at date and time if provided
         created_at_value = None
         if created_at_date.value and created_at_time.value:
@@ -385,6 +402,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             child_image=photo_path,
             created_at=created_at_value,
             child_type=ChildTypeEnum.NONE,
+            department=str(department.value),
         )
 
         # Add child to database with photo path using ChildService
@@ -447,6 +465,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         mum_job.value = ""
         problem.value = ""
         additional_notes.value = ""
+        department.value = ""
         photo_path = None
         _selected_file = None
         photo_preview.src = ""

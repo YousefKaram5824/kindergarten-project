@@ -76,6 +76,18 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
+    edit_department = ft.Dropdown(
+        label="القسم",
+        text_align=ft.TextAlign.RIGHT,
+        width=300,
+        options=[
+            ft.dropdown.Option("قسم التخاطب و العلاج السلوكي"),
+            ft.dropdown.Option("قسم التأخر"),
+            ft.dropdown.Option("قسم التوحد"),
+            ft.dropdown.Option("قسم صعوبات التعلم"),
+            ft.dropdown.Option("القسم المختلط"),
+        ],
+    )
     edit_photo_path = None
     _edit_selected_file = None
     edit_photo_preview = ft.Image(
@@ -180,6 +192,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_mum_job,
                 edit_problem,
                 edit_additional_notes,
+                edit_department,
                 ft.Container(
                     ft.Text(
                         "صورة الطفل:",
@@ -257,6 +270,10 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             show_error("يجب اختيار تاريخ الميلاد!")
             return
 
+        if not edit_department.value:
+            show_error("يجب اختيار القسم!")
+            return
+
         # If a photo file was selected, copy it now
         if _edit_selected_file:
             photos_dir = "child_photos"
@@ -289,6 +306,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             ),
             problems=str(edit_problem.value) if edit_problem.value else None,
             child_image=edit_photo_path,
+            department=str(edit_department.value),
         )
 
         # Update child in database using ChildService
@@ -360,6 +378,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_mum_job.value = child.mother_job or ""
                 edit_problem.value = child.problems or ""
                 edit_additional_notes.value = child.notes or ""
+                edit_department.value = child.department or ""
                 nonlocal edit_photo_path
                 edit_photo_path = child.child_image
                 if edit_photo_path and os.path.exists(edit_photo_path):

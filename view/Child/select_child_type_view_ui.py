@@ -6,7 +6,6 @@ from pathlib import Path
 
 # Local imports
 from database import db_session
-from database import get_db
 from logic.child_logic import ChildService
 from models import ChildTypeEnum
 from DTOs.child_dto import UpdateChildDTO
@@ -104,6 +103,18 @@ class ChildDetailsView:
             width=300,
             read_only=True,
             value=self.child_data.name if self.child_data else "",
+        )
+        # Add department field (read-only)
+        self.department_field = ft.TextField(
+            label="القسم",
+            text_align=ft.TextAlign.RIGHT,
+            width=300,
+            read_only=True,
+            value=(
+                self.child_data.department
+                if self.child_data and hasattr(self.child_data, "department")
+                else ""
+            ),
         )
 
         self.age_field = ft.TextField(
@@ -365,6 +376,13 @@ class ChildDetailsView:
                             self.name_field,
                             ft.Container(width=20),
                             self.age_field,
+                        ],
+                        alignment=ft.MainAxisAlignment.END,
+                    ),
+                    ft.Container(height=20),
+                    ft.Row(
+                        [
+                            self.department_field,
                         ],
                         alignment=ft.MainAxisAlignment.END,
                     ),
@@ -644,6 +662,11 @@ class ChildDetailsView:
     def update_file_preview(self, file_type, file_path):
         preview_container = getattr(self, f"{file_type}_preview")
         actions_row = getattr(self, f"{file_type}_actions")
+
+        if file_path:
+            # Fix for relative paths: convert to absolute if needed
+            if not os.path.isabs(file_path):
+                file_path = os.path.abspath(file_path)
 
         if file_path and os.path.exists(file_path):
             filename = os.path.basename(file_path)
