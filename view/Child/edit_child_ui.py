@@ -16,7 +16,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
 
     # Edit form fields
     edit_child_id = ft.TextField(
-        label="رقم التعريفي للطالب",
+        label="رقم التعريفي للطفل",
         text_align=ft.TextAlign.RIGHT,
         width=300,
         input_filter=ft.InputFilter(
@@ -24,7 +24,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         ),
     )
     edit_child_name = ft.TextField(
-        label="اسم الطالب",
+        label="اسم الطفل",
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
@@ -151,17 +151,17 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
         edit_file_picker.pick_files(
             allow_multiple=False,
             allowed_extensions=["jpg", "jpeg", "png", "gif"],
-            dialog_title="اختر صورة الطالب",
+            dialog_title="اختر صورة الطفل",
         )
 
     edit_photo_upload_btn = ft.ElevatedButton(
-        "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=edit_pick_photo
+        "رفع صورة الطفل", icon=ft.Icons.UPLOAD_FILE, on_click=edit_pick_photo
     )
 
     # Edit child Dialog
     edit_child_dialog = ft.AlertDialog(
         modal=True,
-        title=ft.Text("تعديل بيانات الطالب", text_align=ft.TextAlign.CENTER),
+        title=ft.Text("تعديل بيانات الطفل", text_align=ft.TextAlign.CENTER),
         content=ft.Column(
             [
                 edit_child_id,
@@ -182,7 +182,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                 edit_additional_notes,
                 ft.Container(
                     ft.Text(
-                        "صورة الطالب:",
+                        "صورة الطفل:",
                         size=16,
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.RIGHT,
@@ -237,7 +237,7 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
     def save_edit_child():
         nonlocal current_edit_child_id, _edit_selected_file, edit_photo_path
         if not current_edit_child_id:
-            show_error("لم يتم العثور على الطالب المراد تعديله!")
+            show_error("لم يتم العثور على الطفل المراد تعديله!")
             return
 
         # Validate required fields
@@ -246,11 +246,11 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
             return
 
         if not edit_child_name.value:
-            show_error("يجب إدخال اسم الطالب!")
+            show_error("يجب إدخال اسم الطفل!")
             return
 
         if not edit_child_age.value or int(edit_child_age.value) <= 0:
-            show_error("يجب إدخال عمر صحيح للطالب!")
+            show_error("يجب إدخال عمر صحيح للطفل!")
             return
 
         if not edit_birth_date.value:
@@ -302,11 +302,11 @@ def create_edit_child_dialog(page: ft.Page, update_child_table):
                     # Close dialog and refresh table
                     close_edit_dialog()
                     update_child_table()
-                    show_success("تم تعديل بيانات الطالب بنجاح!")
+                    show_success("تم تعديل بيانات الطفل بنجاح!")
                 else:
-                    show_error("فشل في تعديل بيانات الطالب!")
+                    show_error("فشل في تعديل بيانات الطفل!")
             except Exception as ex:
-                show_error(f"خطأ في تعديل بيانات الطالب: {str(ex)}")
+                show_error(f"خطأ في تعديل بيانات الطفل: {str(ex)}")
 
     def close_edit_dialog():
         nonlocal _edit_selected_file

@@ -21,7 +21,12 @@ from logic.individual_session_logic import IndividualSessionService
 
 class ChildDetailsView:
     def __init__(
-        self, page: ft.Page, child_id: int, update_callback=None, is_edit=False, current_user=None
+        self,
+        page: ft.Page,
+        child_id: int,
+        update_callback=None,
+        is_edit=False,
+        current_user=None,
     ):
         self.page = page
         self.child_id = child_id
@@ -29,7 +34,7 @@ class ChildDetailsView:
         self.is_edit = is_edit
         self.current_user = current_user
         self.current_file_type = None
-        
+
         # Store child data
         self.child_data = None
 
@@ -45,11 +50,15 @@ class ChildDetailsView:
     def init_components(self):
         # Load child data first
         self.load_child_data()
-        
+
         # Title
         child_name = self.child_data.name if self.child_data else "غير محدد"
         self.title = ft.Text(
-            f"تعديل بيانات الطالب: {child_name}" if self.is_edit else f"عرض بيانات الطالب: {child_name}",
+            (
+                f"تعديل بيانات الطفل: {child_name}"
+                if self.is_edit
+                else f"عرض بيانات الطفل: {child_name}"
+            ),
             size=24,
             weight=ft.FontWeight.BOLD,
             text_align=ft.TextAlign.RIGHT,
@@ -90,27 +99,28 @@ class ChildDetailsView:
     def init_form_fields(self):
         # Basic child info (read-only)
         self.name_field = ft.TextField(
-            label="اسم الطالب",
+            label="اسم الطفل",
             text_align=ft.TextAlign.RIGHT,
             width=300,
             read_only=True,
             value=self.child_data.name if self.child_data else "",
         )
-        
+
         self.age_field = ft.TextField(
             label="العمر",
             text_align=ft.TextAlign.RIGHT,
             width=150,
             read_only=True,
-            value=str(self.child_data.age) if self.child_data and self.child_data.age else "",
+            value=(
+                str(self.child_data.age)
+                if self.child_data and self.child_data.age
+                else ""
+            ),
         )
-        
-        
-        
 
         # Type dropdown
         self.type_dropdown = ft.Dropdown(
-            label="نوع الطالب",
+            label="نوع الطفل",
             options=[
                 ft.dropdown.Option(
                     ChildTypeEnum.FULL_DAY.name, ChildTypeEnum.FULL_DAY.value
@@ -124,8 +134,8 @@ class ChildDetailsView:
             width=300,
             disabled=not self.is_edit,
             value=(
-                self.child_data.child_type.name 
-                if self.child_data and self.child_data.child_type != ChildTypeEnum.NONE 
+                self.child_data.child_type.name
+                if self.child_data and self.child_data.child_type != ChildTypeEnum.NONE
                 else None
             ),
         )
@@ -344,7 +354,7 @@ class ChildDetailsView:
             content=ft.Column(
                 [
                     ft.Text(
-                        "البيانات الأساسية للطالب",
+                        "البيانات الأساسية للطفل",
                         size=20,
                         weight=ft.FontWeight.BOLD,
                         color=ft.Colors.INDIGO_700,
@@ -358,7 +368,6 @@ class ChildDetailsView:
                         ],
                         alignment=ft.MainAxisAlignment.END,
                     ),
-                    
                 ]
             ),
             padding=20,
@@ -822,7 +831,7 @@ class ChildDetailsView:
     def save_changes(self, e):
         selected_type = self.type_dropdown.value
         if not selected_type:
-            self.show_snackbar("يرجى اختيار نوع الطالب", ft.Colors.RED)
+            self.show_snackbar("يرجى اختيار نوع الطفل", ft.Colors.RED)
             return
 
         try:
@@ -850,7 +859,7 @@ class ChildDetailsView:
                 success = ChildService.update_child(db, self.child_id, update_dto)
 
                 if not success:
-                    self.show_snackbar("فشل في تحديث نوع الطالب", ft.Colors.RED)
+                    self.show_snackbar("فشل في تحديث نوع الطفل", ft.Colors.RED)
                     return
 
                 # Save type-specific data
@@ -950,7 +959,10 @@ class ChildDetailsView:
             self.update_callback()
         # Clear the page and reload the children table view
         self.page.clean()
-        from view.Child.child_ui import create_child_registration_tab, create_back_button
+        from view.Child.child_ui import (
+            create_child_registration_tab,
+            create_back_button,
+        )
 
         self.page.add(create_back_button(self.page, self.current_user))
         self.page.add(create_child_registration_tab(self.page, self.current_user))
@@ -973,7 +985,7 @@ def create_child_details_view(
                         [
                             ft.Icon(ft.Icons.ERROR, size=64, color=ft.Colors.RED),
                             ft.Text(
-                                "❌ الطالب غير موجود أو تم حذفه",
+                                "❌ الطفل غير موجود أو تم حذفه",
                                 size=18,
                                 color=ft.Colors.RED,
                                 text_align=ft.TextAlign.CENTER,
@@ -998,7 +1010,7 @@ def create_child_details_view(
                 [
                     ft.Icon(ft.Icons.ERROR, size=64, color=ft.Colors.RED),
                     ft.Text(
-                        f"⚠️ حدث خطأ أثناء تحميل بيانات الطالب: {str(e)}",
+                        f"⚠️ حدث خطأ أثناء تحميل بيانات الطفل: {str(e)}",
                         size=16,
                         color=ft.Colors.RED,
                         text_align=ft.TextAlign.CENTER,
@@ -1006,7 +1018,9 @@ def create_child_details_view(
                     ft.ElevatedButton(
                         "العودة",
                         icon=ft.Icons.ARROW_BACK,
-                        on_click=lambda e: page.go("/children") if hasattr(page, 'go') else None,
+                        on_click=lambda e: (
+                            page.go("/children") if hasattr(page, "go") else None
+                        ),
                         bgcolor=ft.Colors.GREY_600,
                         color=ft.Colors.WHITE,
                     ),
@@ -1024,7 +1038,9 @@ def create_child_details_view(
 
 
 # Example usage functions
-def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None, current_user=None):
+def open_child_edit_view(
+    page: ft.Page, child_id: int, update_callback=None, current_user=None
+):
     """Open child details in edit mode"""
     page.clean()
     child_view = create_child_details_view(
@@ -1034,7 +1050,9 @@ def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None, cur
     page.update()
 
 
-def open_child_view_only(page: ft.Page, child_id: int, update_callback=None, current_user=None):
+def open_child_view_only(
+    page: ft.Page, child_id: int, update_callback=None, current_user=None
+):
     """Open child details in view-only mode"""
     page.clean()
     child_view = create_child_details_view(
@@ -1045,7 +1063,9 @@ def open_child_view_only(page: ft.Page, child_id: int, update_callback=None, cur
 
 
 # Alternative: Use as a route in Flet routing system
-def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False, current_user=None):
+def child_details_route(
+    page: ft.Page, child_id: int, is_edit: bool = False, current_user=None
+):
     """
     Route handler for child details page
     Usage with Flet routing:
@@ -1053,15 +1073,21 @@ def child_details_route(page: ft.Page, child_id: int, is_edit: bool = False, cur
     """
 
     def handle_back():
-        if hasattr(page, 'go'):
+        if hasattr(page, "go"):
             page.go("/children")  # Navigate back to children list
         else:
             # Fallback navigation
             page.clean()
-            from view.Child.child_ui import create_child_registration_tab, create_back_button
+            from view.Child.child_ui import (
+                create_child_registration_tab,
+                create_back_button,
+            )
+
             page.add(create_back_button(page, current_user))
             page.add(create_child_registration_tab(page, current_user))
             page.update()
 
-    child_view = create_child_details_view(page, child_id, handle_back, is_edit, current_user)
+    child_view = create_child_details_view(
+        page, child_id, handle_back, is_edit, current_user
+    )
     return child_view

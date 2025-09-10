@@ -11,7 +11,7 @@ class ChildService:
     def create_child(db: Session, child_data: CreateChildDTO) -> ChildDTO:
 
         if not hasattr(child_data, "id") or child_data.id is None:
-            raise ValueError("يجب إدخال الرقم التعريفي للطالب")
+            raise ValueError("يجب إدخال الرقم التعريفي للطفل")
         if child_data.id <= 100:
             raise ValueError("الرقم التعريفي يجب أن يكون أكبر من 100")
 

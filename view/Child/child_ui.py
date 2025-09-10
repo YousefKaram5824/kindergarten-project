@@ -14,7 +14,6 @@ from logic.individual_session_logic import IndividualSessionService
 from view.Child import select_child_type_view_ui
 
 
-
 # Color constants
 INPUT_BGCOLOR = ft.Colors.WHITE
 BORDER_RADIUS = 8
@@ -54,7 +53,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
-            ft.DataColumn(ft.Text("نوع الطالب")),
+            ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
         rows=[],
@@ -139,7 +138,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
-            ft.DataColumn(ft.Text("نوع الطالب")),
+            ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
         rows=[],
@@ -162,7 +161,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             ft.DataColumn(ft.Text("رقم التليفون")),
             ft.DataColumn(ft.Text("وظيفة الأب")),
             ft.DataColumn(ft.Text("وظيفة الأم")),
-            ft.DataColumn(ft.Text("نوع الطالب")),
+            ft.DataColumn(ft.Text("نوع الطفل")),
             ft.DataColumn(ft.Text("الإجراءات")),
         ],
         rows=[],
@@ -202,7 +201,11 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             icon_color=ft.Colors.BLUE,
                             tooltip="تعديل النوع والبيانات",
                             on_click=lambda e, cid=child.id: open_type_selection_dialog(
-                                page, cid, update_all_tables, is_edit=True, current_user=current_user
+                                page,
+                                cid,
+                                update_all_tables,
+                                is_edit=True,
+                                current_user=current_user,
                             ),
                         ),
                     ],
@@ -216,8 +219,6 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         page.clean()
         select_child_type_view_ui.open_child_view_only(page, child_id, current_user)
         page.update()
-
-
 
     def update_child_table():
         # Get childs from database using ChildService with search and type filter
@@ -484,13 +485,13 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                             update_full_day_table()
                             update_sessions_table()
                             snackbar = ft.SnackBar(
-                                content=ft.Text(f"تم حذف الطالب: {child.name}"),
+                                content=ft.Text(f"تم حذف الطفل: {child.name}"),
                                 bgcolor=ft.Colors.GREEN,
                                 duration=3000,
                             )
                         else:
                             snackbar = ft.SnackBar(
-                                content=ft.Text("فشل في حذف الطالب"),
+                                content=ft.Text("فشل في حذف الطفل"),
                                 bgcolor=ft.Colors.RED,
                                 duration=3000,
                             )
@@ -517,7 +518,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
 
                 dialog = ft.AlertDialog(
                     title=ft.Text("تأكيد الحذف"),
-                    content=ft.Text(f"هل تريد حذف الطالب {child.name}؟"),
+                    content=ft.Text(f"هل تريد حذف الطفل {child.name}؟"),
                     actions=[
                         ft.TextButton("نعم", on_click=confirm_delete),
                         ft.TextButton("لا", on_click=cancel_delete),
@@ -535,7 +536,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         [
             ft.Row(
                 [
-                    ft.Text("إدارة الطلاب", size=24, weight=ft.FontWeight.BOLD),
+                    ft.Text("إدارة الأطفال", size=24, weight=ft.FontWeight.BOLD),
                     add_child_btn,
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -551,7 +552,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 alignment=ft.MainAxisAlignment.START,
                 spacing=10,
             ),
-            ft.Text("الطلاب المسجلين:", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text("الأطفال المسجلين:", size=18, weight=ft.FontWeight.BOLD),
             table_container,
         ],
         scroll=ft.ScrollMode.AUTO,

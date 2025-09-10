@@ -15,7 +15,7 @@ def create_financial_tab(page: ft.Page):
     """Create and return the financial management tab"""
     # Financial Management Form in Arabic
     financial_child_name = ft.TextField(
-        label="اسم الطالب", text_align=ft.TextAlign.RIGHT
+        label="اسم الطفل", text_align=ft.TextAlign.RIGHT
     )
     monthly_fee = ft.TextField(
         label="المصروفات الشهرية",

@@ -14,7 +14,7 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
         if not child:
             # Show error and return to student table
             snackbar = ft.SnackBar(
-                content=ft.Text("لم يتم العثور على الطالب"),
+                content=ft.Text("لم يتم العثور على الطفل"),
                 bgcolor=ft.Colors.RED,
                 duration=3000,
             )
@@ -46,10 +46,10 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
             ft.IconButton(
                 icon=ft.Icons.ARROW_BACK,
                 icon_size=24,
-                tooltip="العودة إلى قائمة الطلاب",
+                tooltip="العودة إلى قائمة الأطفال",
                 on_click=go_back_to_student_table,
             ),
-            ft.Text("العودة إلى قائمة الطلاب", size=16),
+            ft.Text("العودة إلى قائمة الأطفال", size=16),
         ],
         alignment=ft.MainAxisAlignment.START,
     )
@@ -71,7 +71,7 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
     details_column = ft.Column(
         [
             ft.Text(
-                "معلومات الطالب",
+                "معلومات الطفل",
                 size=24,
                 weight=ft.FontWeight.BOLD,
                 text_align=ft.TextAlign.CENTER,
@@ -273,7 +273,7 @@ def show_child_details_page(page: ft.Page, child_id: int, current_user=None):
                             ft.Row(
                                 [
                                     ft.Text(
-                                        "نوع الطالب:",
+                                        "نوع الطفل:",
                                         size=16,
                                         weight=ft.FontWeight.BOLD,
                                         text_align=ft.TextAlign.RIGHT,

@@ -20,7 +20,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
 
     # Form fields
     child_id = ft.TextField(
-        label="رقم التعريفي للطالب",
+        label="رقم التعريفي للطفل",
         text_align=ft.TextAlign.RIGHT,
         width=300,
         hint_text="أدخل رقم أكبر من 100",
@@ -29,7 +29,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         ),
     )
     child_name = ft.TextField(
-        label="اسم الطالب",
+        label="اسم الطفل",
         text_align=ft.TextAlign.RIGHT,
         width=300,
     )
@@ -195,17 +195,17 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
         file_picker.pick_files(
             allow_multiple=False,
             allowed_extensions=["jpg", "jpeg", "png", "gif"],
-            dialog_title="اختر صورة الطالب",
+            dialog_title="اختر صورة الطفل",
         )
 
     photo_upload_btn = ft.ElevatedButton(
-        "رفع صورة الطالب", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
+        "رفع صورة الطفل", icon=ft.Icons.UPLOAD_FILE, on_click=pick_photo
     )
 
     # Add child Dialog - Matching auth dialog style
     add_child_dialog = ft.AlertDialog(
         modal=True,
-        title=ft.Text("إضافة طالب جديد", text_align=ft.TextAlign.CENTER),
+        title=ft.Text("إضافة طفل جديد", text_align=ft.TextAlign.CENTER),
         content=ft.Column(
             [
                 child_id,
@@ -234,7 +234,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                 additional_notes,
                 ft.Container(
                     ft.Text(
-                        "صورة الطالب:",
+                        "صورة الطفل:",
                         size=16,
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.RIGHT,
@@ -326,11 +326,11 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                 return
 
         if not child_name.value:
-            show_error("يجب إدخال اسم الطالب!")
+            show_error("يجب إدخال اسم الطفل!")
             return
 
         if not child_age.value or int(child_age.value) <= 0:
-            show_error("يجب إدخال عمر صحيح للطالب!")
+            show_error("يجب إدخال عمر صحيح للطفل!")
             return
 
         if not birth_date.value:
@@ -358,13 +358,15 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
             # Create a folder named after the child's name
             child_name_str = str(child_name.value).strip()
             # Sanitize the folder name (replace spaces and special chars with underscores)
-            folder_name = re.sub(r'[^\w\-_\.]', '_', child_name_str)
+            folder_name = re.sub(r"[^\w\-_\.]", "_", child_name_str)
             child_folder = os.path.join("child_documents", folder_name)
             if not os.path.exists(child_folder):
                 os.makedirs(child_folder)
 
             file_extension = os.path.splitext(_selected_file.name)[1]
-            new_filename = f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            new_filename = (
+                f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{file_extension}"
+            )
             photo_path = os.path.join(child_folder, new_filename)
 
             shutil.copy2(_selected_file.path, photo_path)
@@ -398,11 +400,11 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
                     # Refresh child table
                     update_table_callback()
 
-                    show_success("تم إضافة الطالب بنجاح!")
+                    show_success("تم إضافة الطفل بنجاح!")
                 else:
-                    show_error("فشل في إضافة الطالب!")
+                    show_error("فشل في إضافة الطفل!")
             except Exception as ex:
-                show_error(f"خطأ في إضافة الطالب: {str(ex)}")
+                show_error(f"خطأ في إضافة الطفل: {str(ex)}")
 
     def show_error(message):
         snackbar = ft.SnackBar(
@@ -460,7 +462,7 @@ def create_add_child_dialog(page: ft.Page, update_table_callback):
 
     # Add child button
     add_child_btn = ft.ElevatedButton(
-        "إضافة طالب جديد", icon=ft.Icons.ADD, on_click=open_add_child_dialog
+        "إضافة طفل جديد", icon=ft.Icons.ADD, on_click=open_add_child_dialog
     )
 
     return add_child_dialog, add_child_btn

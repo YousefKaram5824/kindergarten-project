@@ -50,7 +50,7 @@ def open_child_details_view(
 
     # Title and header
     title = ft.Text(
-        "تعديل بيانات الطالب" if is_edit else "عرض بيانات الطالب",
+        "تعديل بيانات الطفل" if is_edit else "عرض بيانات الطفل",
         size=28,
         weight=ft.FontWeight.BOLD,
         text_align=ft.TextAlign.RIGHT,
@@ -62,7 +62,10 @@ def open_child_details_view(
             update_callback()
         # Clear the page and reload the children table view
         page.clean()
-        from view.Child.child_ui import create_child_registration_tab, create_back_button
+        from view.Child.child_ui import (
+            create_child_registration_tab,
+            create_back_button,
+        )
 
         page.add(create_back_button(page, current_user))
         page.add(create_child_registration_tab(page, current_user))
@@ -137,7 +140,7 @@ def open_child_details_view(
 
     # Type dropdown
     type_dropdown = ft.Dropdown(
-        label="نوع الطالب",
+        label="نوع الطفل",
         options=[
             ft.dropdown.Option(
                 ChildTypeEnum.FULL_DAY.name, ChildTypeEnum.FULL_DAY.value
@@ -643,7 +646,7 @@ def open_child_details_view(
     def save_changes(e):
         selected_type = type_dropdown.value
         if not selected_type:
-            show_snackbar("يرجى اختيار نوع الطالب", ft.Colors.ORANGE)
+            show_snackbar("يرجى اختيار نوع الطفل", ft.Colors.ORANGE)
             return
 
         try:
@@ -828,11 +831,19 @@ def open_type_selection_dialog(
     open_child_details_view(page, child_id, update_callback, is_edit, current_user)
 
 
-def open_child_edit_view(page: ft.Page, child_id: int, update_callback=None, current_user=None):
+def open_child_edit_view(
+    page: ft.Page, child_id: int, update_callback=None, current_user=None
+):
     """Open child details in edit mode"""
-    open_child_details_view(page, child_id, update_callback, is_edit=True, current_user=current_user)
+    open_child_details_view(
+        page, child_id, update_callback, is_edit=True, current_user=current_user
+    )
 
 
-def open_child_view_only(page: ft.Page, child_id: int, update_callback=None, current_user=None):
+def open_child_view_only(
+    page: ft.Page, child_id: int, update_callback=None, current_user=None
+):
     """Open child details in view-only mode"""
-    open_child_details_view(page, child_id, update_callback, is_edit=False, current_user=current_user)
+    open_child_details_view(
+        page, child_id, update_callback, is_edit=False, current_user=current_user
+    )

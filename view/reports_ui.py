@@ -32,11 +32,11 @@ def create_reports_tab(page: ft.Page, financial_records, inventory_items):
             تقرير نظام إدارة رياض الأطفال
             =============================
             
-            إجمالي الطلاب: {total_childs}
+            إجمالي الأطفال: {total_childs}
             القيمة المالية الإجمالية: ${total_financial:,.2f}
             قيمة المخزون الإجمالية: ${total_inventory:,.2f}
             
-            الطلاب:
+            الأطفال:
             {chr(10).join([f"- {s.name} (العمر: {s.age or 'غير محدد'})" for s in childs_data])}
             
             السجلات المالية:

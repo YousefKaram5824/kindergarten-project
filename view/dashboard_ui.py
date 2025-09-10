@@ -152,7 +152,7 @@ def create_dashboard(page: ft.Page, current_user):
         ft.NavigationRailDestination(
             icon=ft.Icons.PERSON,
             selected_icon=ft.Icons.PERSON,
-            label="الطلاب",
+            label="الأطفال",
             padding=ft.padding.symmetric(vertical=5),
         ),
         ft.NavigationRailDestination(
@@ -227,7 +227,9 @@ def create_dashboard(page: ft.Page, current_user):
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER,
                     ),
-                    ft.Text("الطلاب المسجلين", size=14, text_align=ft.TextAlign.CENTER),
+                    ft.Text(
+                        "الأطفال المسجلين", size=14, text_align=ft.TextAlign.CENTER
+                    ),
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -300,7 +302,7 @@ def create_dashboard(page: ft.Page, current_user):
                         text_align=ft.TextAlign.CENTER,
                     ),
                     ft.Text(
-                        "طلاب اليوم الكامل", size=14, text_align=ft.TextAlign.CENTER
+                        "أطفال اليوم الكامل", size=14, text_align=ft.TextAlign.CENTER
                     ),
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
@@ -323,7 +325,7 @@ def create_dashboard(page: ft.Page, current_user):
                         weight=ft.FontWeight.BOLD,
                         text_align=ft.TextAlign.CENTER,
                     ),
-                    ft.Text("طلاب الجلسات", size=14, text_align=ft.TextAlign.CENTER),
+                    ft.Text("أطفال الجلسات", size=14, text_align=ft.TextAlign.CENTER),
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -384,7 +386,7 @@ def create_dashboard(page: ft.Page, current_user):
             ft.Row(
                 [
                     ft.ElevatedButton(
-                        "تسجيل طالب جديد",
+                        "تسجيل طفل جديد",
                         icon=ft.Icons.PERSON_ADD,
                         on_click=lambda e: show_child_tab(
                             page, current_user, financial_records, inventory_items
