@@ -226,7 +226,6 @@ class TrainingTool(Base):
     __tablename__ = "training_tools"
     id = Column(Integer, primary_key=True)
     tool_name = Column(String(100))
-    tool_number = Column(String(50))
     tool_image = Column(String(255))  # path to image
     department = Column(String(100))
     purchase_date = Column(Date)
@@ -243,7 +242,6 @@ class ToolForSale(Base):
     quantity = Column(Integer)
     buy_price = Column(Float)
     sell_price = Column(Float)
-    tool_number = Column(String(50))
     remaining = Column(Integer)
     notes = Column(String(1000))
 

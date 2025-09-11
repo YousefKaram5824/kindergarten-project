@@ -6,7 +6,6 @@ from typing import Optional
 class TrainingToolDTO(BaseModel):
     id: int
     tool_name: str
-    tool_number: Optional[str]
     tool_image: Optional[str]
     department: Optional[str]
     purchase_date: Optional[date]
@@ -18,7 +17,6 @@ class TrainingToolDTO(BaseModel):
 
 class CreateTrainingToolDTO(BaseModel):
     tool_name: str
-    tool_number: Optional[str]
     tool_image: Optional[str]
     department: Optional[str]
     purchase_date: Optional[date]
@@ -27,7 +25,6 @@ class CreateTrainingToolDTO(BaseModel):
 
 class UpdateTrainingToolDTO(BaseModel):
     tool_name: Optional[str] = None
-    tool_number: Optional[str] = None
     tool_image: Optional[str] = None
     department: Optional[str] = None
     purchase_date: Optional[date] = None

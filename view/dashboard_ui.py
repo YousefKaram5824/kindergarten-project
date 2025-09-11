@@ -178,6 +178,12 @@ def create_dashboard(page: ft.Page, current_user):
             label="التقارير",
             padding=ft.padding.symmetric(vertical=5),
         ),
+        ft.NavigationRailDestination(
+            icon=ft.Icons.WORK_HISTORY,
+            selected_icon=ft.Icons.WORK_HISTORY,
+            label="العهدة",
+            padding=ft.padding.symmetric(vertical=5),
+        ),
     ]
 
     # Create custom hover navigation rail
@@ -491,6 +497,9 @@ def handle_navigation_change(e, page, current_user, financial_records, inventory
         show_inventory_tab(page, current_user, financial_records, inventory_items)
     elif index == 5:  # Reports
         show_reports_tab(page, current_user, financial_records, inventory_items)
+    elif index == 6:  # Custody (العهدة)
+        show_custody_tab(page, current_user, financial_records, inventory_items)
+
 
 
 def show_dashboard(page, current_user):
@@ -549,6 +558,26 @@ def show_reports_tab(page, current_user, financial_records, inventory_items):
     page.add(create_back_button(page, current_user))
     page.add(reports_tab)
     page.update()
+
+from database import db_session
+
+def show_custody_tab(page, current_user, financial_records, inventory_items):
+    """Show custody management tab (العهدة)"""
+    page.clean()
+    page.padding = ft.padding.only(right=20)
+
+    from view.Custody.custody_ui import create_custody_tab
+
+    
+    with db_session() as db:
+        custody_tab = create_custody_tab(page, db)  
+
+        page.add(create_back_button(page, current_user))
+        page.add(custody_tab)
+        page.update()
+
+
+
 
 
 def create_back_button(page, current_user):
