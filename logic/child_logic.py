@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from models import Child, ChildTypeEnum, FullDayProgram, IndividualSession
 from DTOs.child_dto import ChildDTO, CreateChildDTO, UpdateChildDTO
 from mapper import map_to_dto, map_to_model, update_model_from_dto
@@ -140,7 +141,7 @@ class ChildService:
 
     @staticmethod
     def is_id_available(
-        db: Session, child_id: int, exclude_child_id: int = None
+        db: Session, child_id: int, exclude_child_id: int
     ) -> bool:
         """Check if child ID is available (not used by another child)"""
         query = db.query(Child).filter(Child.id == child_id, Child.is_deleted == False)
@@ -157,4 +158,20 @@ class ChildService:
             .filter(Child.child_type == child_type, Child.is_deleted == False)
             .all()
         )
+        return [map_to_dto(c, ChildDTO) for c in children]
+
+    @staticmethod
+    def get_children_by_year_month(
+        db: Session, year: int, month: int, child_type: ChildTypeEnum
+    ) -> list[ChildDTO]:
+        query = db.query(Child).filter(Child.is_deleted == False)
+        if year:
+            query = query.filter(Child.created_at != None)
+            query = query.filter(func.extract('year', Child.created_at) == year)
+        if month:
+            query = query.filter(Child.created_at != None)
+            query = query.filter(func.extract('month', Child.created_at) == month)
+        if child_type:
+            query = query.filter(Child.child_type == child_type)
+        children = query.all()
         return [map_to_dto(c, ChildDTO) for c in children]

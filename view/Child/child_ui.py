@@ -1,4 +1,5 @@
 import flet as ft
+import datetime
 
 # Local imports
 from database import db_session
@@ -22,7 +23,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
     """Create and return the child registration tab"""
 
     # Current filter state
-    current_filter: dict = {"search_query": "", "child_type": None}
+    current_filter: dict = {"search_query": "", "child_type": None, "year": None, "month": None}
 
     # Search field for filtering childs
     def on_search_change(e):
@@ -41,6 +42,37 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         suffix_icon=ft.Icons.SEARCH,
     )
 
+    # Year and month dropdowns for filtering
+    current_year = datetime.datetime.now().year
+    year_options = [ft.dropdown.Option(str(y), str(y)) for y in range(current_year, current_year - 10, -1)]
+    month_options = [ft.dropdown.Option(str(m), str(m)) for m in range(1, 13)]
+
+    def on_year_change(e):
+        current_filter["year"] = int(e.control.value) if e.control.value else None
+        update_child_table()
+        update_full_day_table()
+        update_sessions_table()
+
+    def on_month_change(e):
+        current_filter["month"] = int(e.control.value) if e.control.value else None
+        update_child_table()
+        update_full_day_table()
+        update_sessions_table()
+
+    year_dropdown = ft.Dropdown(
+        label="السنة",
+        options=year_options,
+        width=150,
+        on_change=on_year_change,
+    )
+
+    month_dropdown = ft.Dropdown(
+        label="الشهر",
+        options=month_options,
+        width=150,
+        on_change=on_month_change,
+    )
+        
     # child table with database integration
     child_data_table = ft.DataTable(
         columns=[
@@ -223,7 +255,14 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
     def update_child_table():
         # Get childs from database using ChildService with search and type filter
         with db_session() as db:
-            if current_filter["child_type"]:
+            if current_filter["year"] or current_filter["month"]:
+                children_dto = ChildService.get_children_by_year_month(
+                    db,
+                    year=current_filter["year"],
+                    month=current_filter["month"],
+                    child_type=current_filter["child_type"],
+                )
+            elif current_filter["child_type"]:
                 children_dto = ChildService.get_children_by_type(
                     db, current_filter["child_type"]
                 )
@@ -233,7 +272,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 )
             else:
                 children_dto = ChildService.get_all_children(db)
-
+                
             if child_data_table.rows is None:
                 child_data_table.rows = []
             else:
@@ -300,9 +339,16 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             page.update()
 
     def update_full_day_table():
-        # Get full day children from database
+    
         with db_session() as db:
-            if current_filter["search_query"]:
+            if current_filter["year"] or current_filter["month"]:
+                children_dto = ChildService.get_children_by_year_month(
+                    db,
+                    year=current_filter["year"],
+                    month=current_filter["month"],
+                    child_type=ChildTypeEnum.FULL_DAY,
+                )
+            elif current_filter["search_query"]:
                 # If search query, get all children and filter by type and search
                 all_children = ChildService.search_children(
                     db, current_filter["search_query"]
@@ -319,7 +365,6 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 full_day_data_table.rows = []
             else:
                 full_day_data_table.rows.clear()
-
             for child in children_dto:
                 # Create action icons for each child
                 action_icons = ft.Row(
@@ -557,6 +602,8 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                     full_day_button,
                     sessions_button,
                     search_field,
+                    year_dropdown,
+                    month_dropdown,
                 ],
                 alignment=ft.MainAxisAlignment.START,
                 spacing=10,
