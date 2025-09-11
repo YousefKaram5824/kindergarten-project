@@ -72,7 +72,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
         width=150,
         on_change=on_month_change,
     )
-        
+
     # child table with database integration
     child_data_table = ft.DataTable(
         columns=[
@@ -161,51 +161,49 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
 
     # Full day children table
     full_day_data_table = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("الاسم")),
-            ft.DataColumn(ft.Text("العمر")),
-            ft.DataColumn(ft.Text("رقم التليفون")),
-            ft.DataColumn(ft.Text("وظيفة الأب")),
-            ft.DataColumn(ft.Text("وظيفة الأم")),
-            ft.DataColumn(ft.Text("القسم")),
-            ft.DataColumn(ft.Text("نوع الطفل")),
-            ft.DataColumn(ft.Text("الإجراءات")),
-        ],
-        rows=[],
-        border=ft.border.all(1, TABLE_BORDER_COLOR),
-        border_radius=ft.border_radius.all(BORDER_RADIUS),
-        vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
-        heading_row_height=45,
-        data_row_max_height=55,
-        column_spacing=20,
-    )
+            columns=[
+                ft.DataColumn(ft.Text("ID")),
+                ft.DataColumn(ft.Text("الاسم")),
+                ft.DataColumn(ft.Text("العمر")),
+                ft.DataColumn(ft.Text("رقم التليفون")),
+                ft.DataColumn(ft.Text("الإنتظام")),
+                ft.DataColumn(ft.Text("القسم")),
+                ft.DataColumn(ft.Text("نوع الطفل")),
+                ft.DataColumn(ft.Text("الإجراءات")),
+            ],
+            rows=[],
+            border=ft.border.all(1, TABLE_BORDER_COLOR),
+            border_radius=ft.border_radius.all(BORDER_RADIUS),
+            vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
+            horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
+            heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
+            heading_row_height=45,
+            data_row_max_height=55,
+            column_spacing=20,
+        )
 
     # Sessions children table
     sessions_data_table = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("ID")),
-            ft.DataColumn(ft.Text("الاسم")),
-            ft.DataColumn(ft.Text("العمر")),
-            ft.DataColumn(ft.Text("رقم التليفون")),
-            ft.DataColumn(ft.Text("وظيفة الأب")),
-            ft.DataColumn(ft.Text("وظيفة الأم")),
-            ft.DataColumn(ft.Text("القسم")),
-            ft.DataColumn(ft.Text("نوع الطفل")),
-            ft.DataColumn(ft.Text("الإجراءات")),
-        ],
-        rows=[],
-        border=ft.border.all(1, TABLE_BORDER_COLOR),
-        border_radius=ft.border_radius.all(BORDER_RADIUS),
-        vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
-        heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
-        heading_row_height=45,
-        data_row_max_height=55,
-        column_spacing=20,
-    )
+            columns=[
+                ft.DataColumn(ft.Text("ID")),
+                ft.DataColumn(ft.Text("الاسم")),
+                ft.DataColumn(ft.Text("العمر")),
+                ft.DataColumn(ft.Text("رقم التليفون")),
+                ft.DataColumn(ft.Text("الإنتظام")),
+                ft.DataColumn(ft.Text("القسم")),
+                ft.DataColumn(ft.Text("نوع الطفل")),
+                ft.DataColumn(ft.Text("الإجراءات")),
+            ],
+            rows=[],
+            border=ft.border.all(1, TABLE_BORDER_COLOR),
+            border_radius=ft.border_radius.all(BORDER_RADIUS),
+            vertical_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
+            horizontal_lines=ft.border.BorderSide(1, TABLE_BORDER_COLOR),
+            heading_row_color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK12),
+            heading_row_height=45,
+            data_row_max_height=55,
+            column_spacing=20,
+        )
 
     def create_type_cell(child):
         if child.child_type == ChildTypeEnum.NONE:
@@ -272,7 +270,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                 )
             else:
                 children_dto = ChildService.get_all_children(db)
-                
+
             if child_data_table.rows is None:
                 child_data_table.rows = []
             else:
@@ -310,7 +308,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                     ],
                     spacing=5,
                 )
-
+    
                 child_data_table.rows.append(
                     ft.DataRow(
                         cells=[
@@ -339,7 +337,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
             page.update()
 
     def update_full_day_table():
-    
+
         with db_session() as db:
             if current_filter["year"] or current_filter["month"]:
                 children_dto = ChildService.get_children_by_year_month(
@@ -410,10 +408,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                                 )
                             ),
                             ft.DataCell(
-                                ft.Text(child.father_job if child.father_job else "-")
-                            ),
-                            ft.DataCell(
-                                ft.Text(child.mother_job if child.mother_job else "-")
+                                ft.Text(child.attendance_status if child.attendance_status else "-")
                             ),
                             ft.DataCell(
                                 ft.Text(child.department if child.department else "-")
@@ -491,10 +486,7 @@ def create_child_registration_tab(page: ft.Page, current_user=None):
                                 )
                             ),
                             ft.DataCell(
-                                ft.Text(child.father_job if child.father_job else "-")
-                            ),
-                            ft.DataCell(
-                                ft.Text(child.mother_job if child.mother_job else "-")
+                                ft.Text(f"{child.attended_sessions_total}/{child.monthly_sessions_total}" if child.attended_sessions_total is not None and child.monthly_sessions_total is not None else "-")
                             ),
                             ft.DataCell(
                                 ft.Text(child.department if child.department else "-")

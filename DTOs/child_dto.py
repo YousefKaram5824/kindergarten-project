@@ -20,10 +20,12 @@ class ChildDTO(BaseModel):
     child_type: ChildTypeEnum
     has_left: Optional[bool] = False
     department: str | None
+    attendance_status: str | None = None
+    attended_sessions_total: int | None = None
+    monthly_sessions_total: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
-
-
+    
 class CreateChildDTO(BaseModel):
     id: int
     name: str

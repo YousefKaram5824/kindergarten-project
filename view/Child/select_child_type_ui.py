@@ -126,7 +126,22 @@ def open_child_details_view(
     # Full day fields
     monthly_fee_field = create_text_field("قيمة الاشتراك الشهري", 280, False, True)
     bus_fee_field = create_text_field("قيمة اشتراك الباص", 280, False, True)
-    attendance_status_field = create_text_field("حالة الحضور", 280)
+    # Attendance status dropdown
+    attendance_status_field = ft.Dropdown(
+        label="حالة الحضور",
+        options=[
+            ft.dropdown.Option("منتظم", "منتظم"),
+            ft.dropdown.Option("غير منتظم", "غير منتظم"),
+        ],
+        text_align=ft.TextAlign.RIGHT,
+        width=200,
+        disabled=not is_edit,
+        border_radius=10,
+        filled=True,
+        bgcolor=ft.Colors.WHITE if is_edit else ft.Colors.GREY_50,
+        border_color=ft.Colors.BLUE_300,
+        value=None,
+    )
 
     # Session fields
     session_fee_field = create_text_field("قيمة الجلسة", 280, False, True)

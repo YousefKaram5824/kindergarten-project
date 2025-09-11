@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func
 from models import Child, ChildTypeEnum, FullDayProgram, IndividualSession
 from DTOs.child_dto import ChildDTO, CreateChildDTO, UpdateChildDTO
@@ -40,7 +40,7 @@ class ChildService:
 
     @staticmethod
     def get_all_children(db: Session) -> list[ChildDTO]:
-        children = db.query(Child).filter(Child.is_deleted == False).all()
+        children = db.query(Child).options(joinedload(Child.full_day_program), selectinload(Child.individual_sessions)).filter(Child.is_deleted == False).all()
         return [map_to_dto(c, ChildDTO) for c in children]
 
     @staticmethod
@@ -93,6 +93,7 @@ class ChildService:
     def get_child_by_id(db: Session, child_id: int) -> ChildDTO | None:
         child = (
             db.query(Child)
+            .options(joinedload(Child.full_day_program), selectinload(Child.individual_sessions))
             .filter(Child.id == child_id, Child.is_deleted == False)
             .first()
         )
@@ -109,6 +110,7 @@ class ChildService:
         search_filter = f"%{query}%"
         children = (
             db.query(Child)
+            .options(joinedload(Child.full_day_program), selectinload(Child.individual_sessions))
             .filter(
                 (Child.name.ilike(search_filter))
                 | (Child.phone_number.ilike(search_filter))
@@ -155,6 +157,7 @@ class ChildService:
         """Get list of children filtered by child type"""
         children = (
             db.query(Child)
+            .options(joinedload(Child.full_day_program), selectinload(Child.individual_sessions))
             .filter(Child.child_type == child_type, Child.is_deleted == False)
             .all()
         )
@@ -164,7 +167,7 @@ class ChildService:
     def get_children_by_year_month(
         db: Session, year: int, month: int, child_type: ChildTypeEnum
     ) -> list[ChildDTO]:
-        query = db.query(Child).filter(Child.is_deleted == False)
+        query = db.query(Child).options(joinedload(Child.full_day_program), selectinload(Child.individual_sessions)).filter(Child.is_deleted == False)
         if year:
             query = query.filter(Child.created_at != None)
             query = query.filter(func.extract('year', Child.created_at) == year)
